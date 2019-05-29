@@ -9,7 +9,7 @@ def authoriseUserStatus(username, password, status='online'):
     username = "wyao332" # FOR TESTING PURPOSES
     password = "wryao64_106379276" # FOR TESTING PURPOSES
 
-    print("Log on attempt from {0}:{1}\n".format(username, password)) # FOR TESTING PURPOSES
+    print("Log on/off attempt from {0}:{1}\n".format(username, password)) # FOR TESTING PURPOSES
 
     url = "http://cs302.kiwi.land/api/report"
 
@@ -35,6 +35,7 @@ def authoriseUserStatus(username, password, status='online'):
         "connection_address": "127.0.0.1:8000",
         "connection_location": "2",
         "incoming_pubkey": pubkey_hex_str,
+        "status": status,
     }
 
     json_bytes = json.dumps(payload).encode('utf-8')
@@ -50,4 +51,3 @@ def authoriseUserStatus(username, password, status='online'):
         print(error.read())
         exit()
         return 1
-
