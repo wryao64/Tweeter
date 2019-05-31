@@ -79,8 +79,7 @@ def ping(username, password):
     try:
         req = urllib.request.Request(url, data=json_bytes, headers=headers)
         response = urllib.request.urlopen(req)
-        data = response.read()  # read the received bytes
-        # load encoding if possible (default to utf-8)
+        data = response.read()
         encoding = response.info().get_content_charset('utf-8')
         response.close()
 
@@ -137,8 +136,7 @@ def report_user_status(username, password, status='online'):
     try:
         req = urllib.request.Request(url, data=json_bytes, headers=headers)
         response = urllib.request.urlopen(req)
-        data = response.read()  # read the received bytes
-        # load encoding if possible (default to utf-8)
+        data = response.read()
         encoding = response.info().get_content_charset('utf-8')
         response.close()
         return True
@@ -167,15 +165,10 @@ def list_online_users():
     try:
         req = urllib.request.Request(url, headers=headers)
         response = urllib.request.urlopen(req)
-        data = response.read()  # read the received bytes
-        # load encoding if possible (default to utf-8)
+        data = response.read()
         encoding = response.info().get_content_charset('utf-8')
         json_object = json.loads(data.decode(encoding))
         users = json_object['users']
-
-        users_str = json.dumps(users, indent=4)
-        print(users_str)
-
         response.close()
 
         return users
