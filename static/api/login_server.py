@@ -19,7 +19,7 @@ def login(username, password):
         # test pub/priv keypair
 
         # report as online
-        return reportUserStatus(username, password, 'online')
+        return report_user_status(username, password, 'online')
     else:
         return False
 
@@ -29,7 +29,7 @@ def logout(username, password):
     User sign out
     """
     # report as offline
-    return reportUserStatus(username, password, 'offline')
+    return report_user_status(username, password, 'offline')
 
 
 def ping(username, password):
@@ -37,7 +37,7 @@ def ping(username, password):
     Checks if the login server is online and authenticates login
     """
 
-    url = "http://cs302.kiwi.land/api/ping"
+    url = 'http://cs302.kiwi.land/api/ping'
 
     username = "wyao332"  # FOR TESTING PURPOSES
     password = "wryao64_106379276"  # FOR TESTING PURPOSES
@@ -92,7 +92,7 @@ def ping(username, password):
         return False
 
 
-def reportUserStatus(username, password, status='online'):
+def report_user_status(username, password, status='online'):
     """
     Informs the login server about connection information for the user
     """
@@ -103,7 +103,7 @@ def reportUserStatus(username, password, status='online'):
     # FOR TESTING PURPOSES
     print("Log on/off attempt from {0}:{1}\n".format(username, password))
 
-    url = "http://cs302.kiwi.land/api/report"
+    url = 'http://cs302.kiwi.land/api/report'
 
     # FOR TESTING PURPOSES
     hex_key = b'cd7f971fc826eeb354c5ade4293b5e83a93c74c1aa624a2c28e6a14b97ae3d0d'
@@ -146,3 +146,39 @@ def reportUserStatus(username, password, status='online'):
         print(error.read())
         exit()
         return False
+
+def list_online_users():
+    """
+    Lists the connection details for all active users within the last five minutes
+    """
+    url = 'http://cs302.kiwi.land/api/list_users'
+
+    username = "wyao332"  # FOR TESTING PURPOSES
+    password = "wryao64_106379276"  # FOR TESTING PURPOSES
+
+    # create HTTP BASIC authorization header
+    credentials = ('%s:%s' % (username, password))
+    b64_credentials = base64.b64encode(credentials.encode('ascii'))
+    headers = {
+        'Authorization': 'Basic %s' % b64_credentials.decode('ascii'),
+        'Content-Type': 'application/json; charset=utf-8',
+    }
+
+    try:
+        req = urllib.request.Request(url, headers=headers)
+        response = urllib.request.urlopen(req)
+        data = response.read()  # read the received bytes
+        # load encoding if possible (default to utf-8)
+        encoding = response.info().get_content_charset('utf-8')
+        json_object = json.loads(data.decode(encoding))
+        users = json_object['users']
+
+        users_str = json.dumps(users, indent=4)
+        print(users_str)
+
+        response.close()
+
+        return users_str
+    except urllib.error.HTTPError as error:
+        print(error.read())
+        exit()

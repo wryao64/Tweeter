@@ -5,10 +5,12 @@ import static.api.login_server as login_server
 startHTML = """<html>
                 <head>
                     <title>Python Project</title>
-                    <link rel='stylesheet' href='/static/css/styles.css' />
+                    <link rel="stylesheet" href="/static/css/styles.css" />
                 </head>
                 
-                <body>"""
+                <body>
+                    <a href="list_online_users">list online users</a><br/>
+            """
 
 
 class MainApp(object):
@@ -22,20 +24,20 @@ class MainApp(object):
     @cherrypy.expose
     def default(self, *args, **kwargs):
         """The default page, given when we don't recognise where the request is for."""
-        Page = startHTML + "Error 404: Page does not exist."
+        Page = startHTML + 'Error 404: Page does not exist.'
         cherrypy.response.status = 404
         return Page
 
     # Pages
     @cherrypy.expose
     def index(self):
-        Page = startHTML + "Welcome! This is the base website!<br/>"
+        Page = startHTML + 'Welcome! This is the base website!<br/>'
 
         try:
-            Page += "Hello " + cherrypy.session['username'] + "!<br/>"
-            Page += "You have logged in! <a href='/signout'>Sign out</a>"
+            Page += 'Hello ' + cherrypy.session['username'] + '!<br/>'
+            Page += 'You have logged in! <a href="/sign_out">Sign out</a>'
         except KeyError:  # There is no username
-            Page += "Click here to <a href='login'>login</a>."
+            Page += 'Click here to <a href="login">login</a>.'
         return Page
 
     @cherrypy.expose
@@ -43,9 +45,9 @@ class MainApp(object):
         Page = startHTML
 
         if bad_attempt != 0:
-            Page += "<font color='red'>Invalid username/password!</font>"
+            Page += '<font color="red">Invalid username/password!</font>'
 
-        Page += '<form action="/signin" method="post" enctype="multipart/form-data">'
+        Page += '<form action="/sign_in" method="post" enctype="multipart/form-data">'
         Page += 'Username: <input type="text" name="username"/><br/>'
         Page += 'Password: <input type="password" name="password"/><br/>'
         Page += '<input type="submit" value="Login"/></form>'
@@ -53,7 +55,7 @@ class MainApp(object):
 
     # Logging in and out
     @cherrypy.expose
-    def signin(self, username=None, password=None):
+    def sign_in(self, username=None, password=None):
         """Check their name and password and send them either to the main page, or back to the main login screen."""
         isLoggedIn = login_server.login(username, password)
 
@@ -68,7 +70,7 @@ class MainApp(object):
             raise cherrypy.HTTPRedirect('/login?bad_attempt=1')
 
     @cherrypy.expose
-    def signout(self):
+    def sign_out(self):
         """Logs the current user out, expires their session"""
         username = cherrypy.session.get('username')
         password = cherrypy.session.get('password')
@@ -81,3 +83,12 @@ class MainApp(object):
             if isLoggedOut == True:
                 cherrypy.lib.sessions.expire()
             raise cherrypy.HTTPRedirect('/')
+    
+    @cherrypy.expose
+    def list_online_users(self):
+        data = login_server.list_online_users()
+
+        Page = startHTML + data
+
+        return Page
+        
