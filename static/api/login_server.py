@@ -12,16 +12,18 @@ def login(username, password):
     """
     User sign in
     """
-    # authenticate user
     isAuthenticated = ping(username, password)
 
-    if isAuthenticated == True:
+    if isAuthenticated == 'ok':
         # check public/private keypair
 
         # test pub/priv keypair
 
-        # report as online
-        return report_user_status(username, password, 'online')
+        isOk = report_user_status(username, password, 'online')
+        if isOk == 'ok':
+            return True
+        else:
+            return False
     else:
         return False
 
@@ -30,15 +32,17 @@ def logout(username, password):
     """
     User sign out
     """
-    # report as offline
-    return report_user_status(username, password, 'offline')
+    isOk = report_user_status(username, password, 'offline')
+    if isOk == 'ok':
+        return True
+    else:
+        return False
 
 
 def ping(username, password):
     """
     Checks if the login server is online and authenticates login
     """
-
     url = 'http://cs302.kiwi.land/api/ping'
 
     username = "wyao332"  # FOR TESTING PURPOSES
@@ -78,26 +82,14 @@ def ping(username, password):
 
     json_bytes = json.dumps(payload).encode('utf-8')
 
-    try:
-        req = urllib.request.Request(url, data=json_bytes, headers=headers)
-        response = urllib.request.urlopen(req)
-        data = response.read()
-        encoding = response.info().get_content_charset('utf-8')
-        response.close()
-
-        return True
-    except urllib.error.HTTPError as error:
-        print(error.read())
-        exit()
-
-        return False
+    data_object = api_helper.getData(url, headers, json_bytes)
+    return data_object['response']
 
 
 def report_user_status(username, password, status='online'):
     """
     Informs the login server about connection information for the user
     """
-
     username = "wyao332"  # FOR TESTING PURPOSES
     password = "wryao64_106379276"  # FOR TESTING PURPOSES
 
@@ -135,17 +127,8 @@ def report_user_status(username, password, status='online'):
 
     json_bytes = json.dumps(payload).encode('utf-8')
 
-    try:
-        req = urllib.request.Request(url, data=json_bytes, headers=headers)
-        response = urllib.request.urlopen(req)
-        data = response.read()
-        encoding = response.info().get_content_charset('utf-8')
-        response.close()
-        return True
-    except urllib.error.HTTPError as error:
-        print(error.read())
-        exit()
-        return False
+    data_object = api_helper.getData(url, headers, json_bytes)
+    return data_object['response']
 
 
 def list_online_users():
