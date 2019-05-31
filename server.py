@@ -55,12 +55,15 @@ class MainApp(object):
     @cherrypy.expose
     def signin(self, username=None, password=None):
         """Check their name and password and send them either to the main page, or back to the main login screen."""
-        error = login_server.authoriseUserStatus(username, password)
+        isLoggedIn = login_server.login(username, password)
 
-        if error == 0:
+        if isLoggedIn == 0:
             cherrypy.session['username'] = username
             cherrypy.session['password'] = password
             raise cherrypy.HTTPRedirect('/')
+
+            # tell user they are online
+
         else:
             raise cherrypy.HTTPRedirect('/login?bad_attempt=1')
 
@@ -73,7 +76,7 @@ class MainApp(object):
         if username is None or password is None:
             pass
         else:
-            error = login_server.authoriseUserStatus(username, password, 'offline')
+            error = login_server.logout(username, password)
 
             if error == 0:
                 cherrypy.lib.sessions.expire()
