@@ -178,7 +178,7 @@ def list_online_users():
 
         response.close()
 
-        return users_str
+        return users
     except urllib.error.HTTPError as error:
         print(error.read())
         exit()

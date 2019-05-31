@@ -86,9 +86,20 @@ class MainApp(object):
     
     @cherrypy.expose
     def list_online_users(self):
-        data = login_server.list_online_users()
+        Page = startHTML
 
-        Page = startHTML + data
+        users = login_server.list_online_users()
+
+        for user in users:
+            Page += f"""
+            Incoming pub key: {user['incoming_pubkey']}<br/>
+            Username: {user['username']}<br/>
+            Connection Location: {user['connection_location']}<br/>
+            Connection Address: {user['connection_address']}<br/>
+            Status: {user['status']}<br/>
+            Connection Updated At: {user['connection_updated_at']}<br/>
+            <br/>
+            """.format()
 
         return Page
         
