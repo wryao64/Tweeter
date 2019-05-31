@@ -57,7 +57,7 @@ class MainApp(object):
         """Check their name and password and send them either to the main page, or back to the main login screen."""
         isLoggedIn = login_server.login(username, password)
 
-        if isLoggedIn == 0:
+        if isLoggedIn == True:
             cherrypy.session['username'] = username
             cherrypy.session['password'] = password
             raise cherrypy.HTTPRedirect('/')
@@ -76,8 +76,8 @@ class MainApp(object):
         if username is None or password is None:
             pass
         else:
-            error = login_server.logout(username, password)
+            isLoggedOut = login_server.logout(username, password)
 
-            if error == 0:
+            if isLoggedOut == True:
                 cherrypy.lib.sessions.expire()
             raise cherrypy.HTTPRedirect('/')

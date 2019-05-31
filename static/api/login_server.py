@@ -6,43 +6,47 @@ import nacl.signing
 import time
 
 
-"""
-User sign in
-"""
 def login(username, password):
+    """
+    User sign in
+    """
     # authenticate user
     isAuthenticated = ping(username, password)
-    print("isAuthenticated: {0}".format(isAuthenticated))
 
-    # check public/private keypair
+    if isAuthenticated == True:
+        # check public/private keypair
 
-    # test pub/priv keypair
+        # test pub/priv keypair
 
-    # report as online
+        # report as online
+        return reportUserStatus(username, password, 'online')
+    else:
+        return False
 
-    return 0
 
-
-"""
-User sign out
-"""
 def logout(username, password):
+    """
+    User sign out
+    """
     # report as offline
-    return 0
+    return reportUserStatus(username, password, 'offline')
 
 
-"""
-Checks if the login server is online and authenticates login
-"""
 def ping(username, password):
+    """
+    Checks if the login server is online and authenticates login
+    """
+
     url = "http://cs302.kiwi.land/api/ping"
 
-    username = "wyao332" # FOR TESTING PURPOSES
-    password = "wryao64_106379276" # FOR TESTING PURPOSES
+    username = "wyao332"  # FOR TESTING PURPOSES
+    password = "wryao64_106379276"  # FOR TESTING PURPOSES
 
-    hex_key = b'cd7f971fc826eeb354c5ade4293b5e83a93c74c1aa624a2c28e6a14b97ae3d0d' # FOR TESTING PURPOSES
+    # FOR TESTING PURPOSES
+    hex_key = b'cd7f971fc826eeb354c5ade4293b5e83a93c74c1aa624a2c28e6a14b97ae3d0d'
 
-    signing_key = nacl.signing.SigningKey(hex_key, encoder=nacl.encoding.HexEncoder)
+    signing_key = nacl.signing.SigningKey(
+        hex_key, encoder=nacl.encoding.HexEncoder)
 
     # Obtain the verify key for a given signing key
     pubkey = signing_key.verify_key
@@ -80,15 +84,19 @@ def ping(username, password):
         encoding = response.info().get_content_charset('utf-8')
         response.close()
 
-        return 0
+        return True
     except urllib.error.HTTPError as error:
         print(error.read())
         exit()
 
-        return 1
+        return False
 
 
 def reportUserStatus(username, password, status='online'):
+    """
+    Informs the login server about connection information for the user
+    """
+
     username = "wyao332"  # FOR TESTING PURPOSES
     password = "wryao64_106379276"  # FOR TESTING PURPOSES
 
@@ -99,7 +107,8 @@ def reportUserStatus(username, password, status='online'):
 
     # FOR TESTING PURPOSES
     hex_key = b'cd7f971fc826eeb354c5ade4293b5e83a93c74c1aa624a2c28e6a14b97ae3d0d'
-    signing_key = nacl.signing.SigningKey(hex_key, encoder=nacl.encoding.HexEncoder)
+    signing_key = nacl.signing.SigningKey(
+        hex_key, encoder=nacl.encoding.HexEncoder)
 
     # Obtain the verify key for a given signing key
     pubkey = signing_key.verify_key
@@ -132,8 +141,8 @@ def reportUserStatus(username, password, status='online'):
         # load encoding if possible (default to utf-8)
         encoding = response.info().get_content_charset('utf-8')
         response.close()
-        return 0
+        return True
     except urllib.error.HTTPError as error:
         print(error.read())
         exit()
-        return 1
+        return False
