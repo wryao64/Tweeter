@@ -8,6 +8,53 @@ import time
 import static.utils.api_helper as api_helper
 
 
+def add_privatedata():
+    """
+    """
+
+
+def add_pubkey():
+    """
+    """
+
+
+def check_pubkey():
+    """
+    """
+
+
+def get_loginserver_record():
+    """
+    """
+
+
+def get_privatedata():
+    """
+    """
+
+
+def list_online_users():
+    """
+    Lists the connection details for all active users within the last five minutes
+    """
+    url = 'http://cs302.kiwi.land/api/list_users'
+
+    username = "wyao332"  # FOR TESTING PURPOSES
+    password = "wryao64_106379276"  # FOR TESTING PURPOSES
+
+    # create HTTP BASIC authorization header
+    credentials = ('%s:%s' % (username, password))
+    b64_credentials = base64.b64encode(credentials.encode('ascii'))
+    headers = {
+        'Authorization': 'Basic %s' % b64_credentials.decode('ascii'),
+        'Content-Type': 'application/json; charset=utf-8',
+    }
+
+    data_object = api_helper.getData(url, headers)
+    users = data_object['users']
+    return users
+
+
 def login(username, password):
     """
     User sign in
@@ -131,33 +178,12 @@ def report_user_status(username, password, status='online'):
     return data_object['response']
 
 
-def list_online_users():
-    """
-    Lists the connection details for all active users within the last five minutes
-    """
-    url = 'http://cs302.kiwi.land/api/list_users'
-
-    username = "wyao332"  # FOR TESTING PURPOSES
-    password = "wryao64_106379276"  # FOR TESTING PURPOSES
-
-    # create HTTP BASIC authorization header
-    credentials = ('%s:%s' % (username, password))
-    b64_credentials = base64.b64encode(credentials.encode('ascii'))
-    headers = {
-        'Authorization': 'Basic %s' % b64_credentials.decode('ascii'),
-        'Content-Type': 'application/json; charset=utf-8',
-    }
-
-    data_object = api_helper.getData(url, headers)
-    users = data_object['users']
-    return users
-
 def server_pubkey():
     """
     Returns the public key of the login server
     """
     url = 'http://cs302.kiwi.land/api/loginserver_pubkey'
-    
+
     data_object = api_helper.getData(url)
     pubkey = data_object['pubkey']
     return pubkey
