@@ -3,12 +3,14 @@ import json
 import base64
 
 
-def getData(url, headers, data=None):
+def getData(url, headers=None, data=None):
     """
     Retrieves data from API endpoint
     """
     try:
-        if data == None:
+        if headers == None and data == None:
+            req = urllib.request.Request(url)
+        elif data == None:
             req = urllib.request.Request(url, headers=headers)
         else:
             req = urllib.request.Request(url, data=data, headers=headers)

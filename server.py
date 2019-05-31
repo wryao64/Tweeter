@@ -10,6 +10,7 @@ startHTML = """<html>
                 
                 <body>
                     <a href="list_online_users">list online users</a><br/>
+                    <a href="server_pubkey">server pubkey</a><br/>
             """
 
 
@@ -102,4 +103,11 @@ class MainApp(object):
             """.format()
 
         return Page
+    
+    @cherrypy.expose
+    def server_pubkey(self):
+        Page = startHTML
+
+        Page += login_server.server_pubkey()
         
+        return Page

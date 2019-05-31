@@ -151,3 +151,13 @@ def list_online_users():
     data_object = api_helper.getData(url, headers)
     users = data_object['users']
     return users
+
+def server_pubkey():
+    """
+    Returns the public key of the login server
+    """
+    url = 'http://cs302.kiwi.land/api/loginserver_pubkey'
+    
+    data_object = api_helper.getData(url)
+    pubkey = data_object['pubkey']
+    return pubkey
