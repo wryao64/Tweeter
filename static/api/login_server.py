@@ -5,6 +5,8 @@ import nacl.encoding
 import nacl.signing
 import time
 
+import static.utils.api_helper as api_helper
+
 
 def login(username, password):
     """
@@ -145,6 +147,7 @@ def report_user_status(username, password, status='online'):
         exit()
         return False
 
+
 def list_online_users():
     """
     Lists the connection details for all active users within the last five minutes
@@ -162,16 +165,6 @@ def list_online_users():
         'Content-Type': 'application/json; charset=utf-8',
     }
 
-    try:
-        req = urllib.request.Request(url, headers=headers)
-        response = urllib.request.urlopen(req)
-        data = response.read()
-        encoding = response.info().get_content_charset('utf-8')
-        json_object = json.loads(data.decode(encoding))
-        users = json_object['users']
-        response.close()
-
-        return users
-    except urllib.error.HTTPError as error:
-        print(error.read())
-        exit()
+    data_object = api_helper.getData(url, headers)
+    users = data_object['users']
+    return users
