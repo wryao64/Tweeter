@@ -13,7 +13,7 @@ startHTML = """<html>
                     <a href="server_pubkey">server pubkey</a><br/>
                     <a href="add_pubkey">add pubkey</a><br/>
                     <a href="check_pubkey">check pubkey</a><br/>
-
+                    <a href="get_loginserver_record">get login server record</a><br/>
             """
 
 
@@ -139,6 +139,18 @@ class MainApp(object):
         Connection Address: {data['connection_address']}<br/>
         Connection Location: {data['connection_location']}<br/>
         Connection Updated At: {data['connection_updated_at']}<br/>            
+        """
+
+        return Page
+    
+    @cherrypy.expose
+    def get_loginserver_record(self):
+        Page = startHTML
+
+        data = login_server.get_loginserver_record()
+
+        Page += f"""
+        Login Server Record: {data['loginserver_record']}<br/>           
         """
 
         return Page

@@ -97,7 +97,23 @@ def check_pubkey():
 
 def get_loginserver_record():
     """
+    Loads the user's current loginserver_record for use in creating point-to-point messages.
     """
+    url = 'http://cs302.kiwi.land/api/get_loginserver_record'
+
+    username = "wyao332"  # FOR TESTING PURPOSES
+    password = "wryao64_106379276"  # FOR TESTING PURPOSES
+
+    # create HTTP BASIC authorization header
+    credentials = ('%s:%s' % (username, password))
+    b64_credentials = base64.b64encode(credentials.encode('ascii'))
+    headers = {
+        'Authorization': 'Basic %s' % b64_credentials.decode('ascii'),
+        'Content-Type': 'application/json; charset=utf-8',
+    }
+
+    data_object = api_helper.getData(url, headers=headers)
+    return data_object
 
 
 def get_privatedata():
