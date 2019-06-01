@@ -35,15 +35,8 @@ def add_privatedata(username, password):
     hex_key = b'cd7f971fc826eeb354c5ade4293b5e83a93c74c1aa624a2c28e6a14b97ae3d0d'
     signing_key = nacl.signing.SigningKey(hex_key, encoder=nacl.encoding.HexEncoder)
 
-    # Obtain the verify key for a given signing key
-    pubkey = signing_key.verify_key
-
-    # Serialize the verify key to send it to a third party
-    pubkey_hex = pubkey.encode(encoder=nacl.encoding.HexEncoder)
-    pubkey_hex_str = pubkey_hex.decode('utf-8')
-
     # Message
-    message_bytes = bytes(pubkey_hex_str + username, encoding='utf-8')
+    message_bytes = bytes(encrypted_data + loginserver_record + ts, encoding='utf-8')
 
     # Sign message with signing/private key
     signed = signing_key.sign(message_bytes, encoder=nacl.encoding.HexEncoder)
