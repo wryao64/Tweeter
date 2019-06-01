@@ -17,6 +17,7 @@ def add_privatedata(username, password):
 
     username = "wyao332"  # FOR TESTING PURPOSES
     password = "wryao64_106379276"  # FOR TESTING PURPOSES
+    key = 'strongkey'  # FOR TESTING PURPOSE: change to take user input
 
     data = {
         'prikeys': [],
@@ -24,30 +25,35 @@ def add_privatedata(username, password):
         'blocked_usernames': [],
         'blocked_words': [],
         'blocked_message_signatures': [],
+        'favourite_message_signatures': [],
         'friends_usernames': [],
     }
 
-    # encrypt data
-    encrypted_data = data  # TODO: ENCRYPT
+    json_data = json.dumps(data)
 
-    loginserver_record = get_loginserver_record(username, password)
+    encrypted_data = security_helper.encrypt_data(key, json_data)
+
+    loginserver_record = get_loginserver_record(
+        username, password)['loginserver_record']
     ts = time.time()
 
     keys = security_helper.get_keys(
-        encrypted_data + loginserver_record + ts)  # FOR TESTING PURPOSES
+        encrypted_data + loginserver_record + str(ts))  # FOR TESTING PURPOSES
 
     headers = api_helper.create_header(username, password)
 
     payload = {
         'privatedata': encrypted_data,
         'loginserver_record': loginserver_record,
-        'client_saved_at': ts,
+        'client_saved_at': str(ts),
         'signature': keys['signature'],
     }
 
     json_bytes = json.dumps(payload).encode('utf-8')
 
     data_object = api_helper.get_data(url, headers=headers, data=json_bytes)
+    data_str = json.dumps(data_object, indent=4)
+    print(data_str)
     return data_object
 
 

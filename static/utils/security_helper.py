@@ -1,5 +1,32 @@
+import base64
 import nacl.encoding
+import nacl.pwhash
+import nacl.secret
 import nacl.signing
+import nacl.utils
+
+
+def encrypt_data(key, data):
+    """
+    Encrypts user's private data using Secret Key Encryption
+    """
+    # Generate secret box
+    key_password = bytes(key, encoding='utf-8')
+    salt = (key_password * 16)[:16]
+    sym_key = nacl.pwhash.argon2i.kdf(
+        nacl.secret.SecretBox.KEY_SIZE, key_password, salt)
+
+    box = nacl.secret.SecretBox(sym_key)
+
+    # Encrypt data
+    byte_data = bytes(data, encoding='utf-8')
+
+    nonce = nacl.utils.random(nacl.secret.SecretBox.NONCE_SIZE)
+
+    encrypted_data = box.encrypt(byte_data, nonce=nonce)
+    encrypted_data = str(base64.b64encode(encrypted_data))
+
+    return encrypted_data
 
 
 def get_keys(message_data=None, use_pubkey=False):
@@ -8,7 +35,8 @@ def get_keys(message_data=None, use_pubkey=False):
     """
     # hex_key = nacl.signing.SigningKey.generate().encode(encoder=nacl.encoding.HexEncoder)
     hex_key = b'cd7f971fc826eeb354c5ade4293b5e83a93c74c1aa624a2c28e6a14b97ae3d0d'
-    signing_key = nacl.signing.SigningKey(hex_key, encoder=nacl.encoding.HexEncoder)
+    signing_key = nacl.signing.SigningKey(
+        hex_key, encoder=nacl.encoding.HexEncoder)
 
     # Obtain the verify key for a given signing key
     pubkey = signing_key.verify_key
