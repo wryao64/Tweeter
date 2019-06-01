@@ -237,3 +237,15 @@ def server_pubkey():
     data_object = api_helper.get_data(url)
     pubkey = data_object['pubkey']
     return pubkey
+
+def list_apis():
+    """
+    Lists the APIs supported by the login server
+    """
+    url = 'http://cs302.kiwi.land/api/list_apis'
+
+    data_object = api_helper.get_data(url)
+    json_data = json.dumps(data_object, indent=4)
+    print(json_data)
+
+    return data_object

@@ -16,6 +16,7 @@ startHTML = """<html>
                     <a href="get_loginserver_record">get login server record</a><br/>
                     <a href="add_privatedata">add private data</a><br/>
                     <a href="get_privatedata">get private data</a><br/>
+                    <a href="list_apis">list apis</a><br/>
             """
 
 
@@ -91,7 +92,7 @@ class MainApp(object):
             if isLoggedOut == True:
                 cherrypy.lib.sessions.expire()
             raise cherrypy.HTTPRedirect('/')
-    
+
     @cherrypy.expose
     def list_online_users(self):
         username = cherrypy.session.get('username')
@@ -110,18 +111,18 @@ class MainApp(object):
             Status: {user['status']}<br/>
             Connection Updated At: {user['connection_updated_at']}<br/>
             <br/>
-            """.format()
+            """
 
         return Page
-    
+
     @cherrypy.expose
     def server_pubkey(self):
         Page = startHTML
 
         Page += login_server.server_pubkey()
-        
+
         return Page
-    
+
     @cherrypy.expose
     def add_privatedata(self):
         username = cherrypy.session.get('username')
@@ -147,7 +148,7 @@ class MainApp(object):
         """
 
         return Page
-    
+
     @cherrypy.expose
     def check_pubkey(self):
         username = cherrypy.session.get('username')
@@ -166,7 +167,7 @@ class MainApp(object):
         """
 
         return Page
-    
+
     @cherrypy.expose
     def get_loginserver_record(self):
         username = cherrypy.session.get('username')
@@ -200,5 +201,30 @@ class MainApp(object):
         Favourite Message Signatures: {data['favourite_message_signatures']}<br/>
         Friends' Usernames: {data['friends_usernames']}<br/>
         """
+
+        return Page
+
+    @cherrypy.expose
+    def list_apis(self):
+        Page = startHTML
+
+        data = login_server.list_apis()
+
+        for d in data:
+            if d != '/rx_broadcast' and d != '/rx_privatemessage':
+                Page += f"""
+                <strong>API: {d}</strong><br/>
+                Method: {data[d]['method']}<br/>
+                Requires auth: {data[d]['requires_auth']}<br/>
+                Purpose: {data[d]['purpose']}<br/>
+                <br/>
+                """
+            else:
+                Page += f"""
+                <strong>API: {d}</strong><br/>
+                Method: {data[d]['method']}<br/>
+                Purpose: {data[d]['purpose']}<br/>
+                <br/>
+                """
 
         return Page
