@@ -6,6 +6,7 @@ import nacl.signing
 import time
 
 import static.utils.api_helper as api_helper
+import static.utils.security_helper as security_helper
 
 
 def add_privatedata(username, password):
@@ -32,7 +33,8 @@ def add_privatedata(username, password):
     loginserver_record = get_loginserver_record(username, password)
     ts = time.time()
 
-    keys = api_helper.get_keys(encrypted_data + loginserver_record + ts)  # FOR TESTING PURPOSES
+    keys = security_helper.get_keys(
+        encrypted_data + loginserver_record + ts)  # FOR TESTING PURPOSES
 
     headers = api_helper.create_header(username, password)
 
@@ -57,7 +59,7 @@ def add_pubkey(username, password):
 
     username = "wyao332"  # FOR TESTING PURPOSES
     password = "wryao64_106379276"  # FOR TESTING PURPOSES
-    keys = api_helper.get_keys(username, True)  # FOR TESTING PURPOSES
+    keys = security_helper.get_keys(username, True)  # FOR TESTING PURPOSES
 
     headers = api_helper.create_header(username, password)
 
@@ -81,7 +83,7 @@ def check_pubkey(username, password):
 
     username = "wyao332"  # FOR TESTING PURPOSES
     password = "wryao64_106379276"  # FOR TESTING PURPOSES
-    keys = api_helper.get_keys()  # FOR TESTING PURPOSES
+    keys = security_helper.get_keys()  # FOR TESTING PURPOSES
 
     headers = api_helper.create_header(username, password)
 
@@ -166,7 +168,7 @@ def ping(username, password):
 
     username = "wyao332"  # FOR TESTING PURPOSES
     password = "wryao64_106379276"  # FOR TESTING PURPOSES
-    keys = api_helper.get_keys()  # FOR TESTING PURPOSES
+    keys = security_helper.get_keys()  # FOR TESTING PURPOSES
 
     headers = api_helper.create_header(username, password)
 
@@ -188,7 +190,7 @@ def report_user_status(username, password, status='online'):
     """
     username = "wyao332"  # FOR TESTING PURPOSES
     password = "wryao64_106379276"  # FOR TESTING PURPOSES
-    keys = api_helper.get_keys()  # FOR TESTING PURPOSES
+    keys = security_helper.get_keys()  # FOR TESTING PURPOSES
 
     url = 'http://cs302.kiwi.land/api/report'
 
