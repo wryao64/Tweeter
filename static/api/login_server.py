@@ -17,6 +17,46 @@ def add_pubkey():
     """
     Associates a public key with the user's account
     """
+    url = "http://cs302.kiwi.land/api/add_pubkey"
+
+    username = "wyao332"  # FOR TESTING PURPOSES
+    password = "wryao64_106379276"  # FOR TESTING PURPOSES
+
+    hex_key = b'cd7f971fc826eeb354c5ade4293b5e83a93c74c1aa624a2c28e6a14b97ae3d0d'
+    signing_key = nacl.signing.SigningKey(hex_key, encoder=nacl.encoding.HexEncoder)
+
+    # Obtain the verify key for a given signing key
+    pubkey = signing_key.verify_key
+
+    # Serialize the verify key to send it to a third party
+    pubkey_hex = pubkey.encode(encoder=nacl.encoding.HexEncoder)
+    pubkey_hex_str = pubkey_hex.decode('utf-8')
+
+    # Message
+    message_bytes = bytes(pubkey_hex_str + username, encoding='utf-8')
+
+    # Sign message with signing/private key
+    signed = signing_key.sign(message_bytes, encoder=nacl.encoding.HexEncoder)
+    signature_hex_str = signed.signature.decode('utf-8')
+
+    # create HTTP BASIC authorization header
+    credentials = ('%s:%s' % (username, password))
+    b64_credentials = base64.b64encode(credentials.encode('ascii'))
+    headers = {
+        'Authorization': 'Basic %s' % b64_credentials.decode('ascii'),
+        'Content-Type': 'application/json; charset=utf-8',
+    }
+
+    payload = {
+        "pubkey": pubkey_hex_str,
+        "username": username,
+        "signature": signature_hex_str,
+    }
+
+    json_bytes = json.dumps(payload).encode('utf-8')
+
+    data_object = api_helper.getData(url, headers=headers, data=json_bytes)
+    return data_object
 
 
 def check_pubkey():
@@ -51,7 +91,6 @@ def check_pubkey():
     url += "?pubkey=" + pubkey_hex_str
 
     data_object = api_helper.getData(url, headers=headers)
-
     return data_object
 
 

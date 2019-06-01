@@ -11,6 +11,7 @@ startHTML = """<html>
                 <body>
                     <a href="list_online_users">list online users</a><br/>
                     <a href="server_pubkey">server pubkey</a><br/>
+                    <a href="add_pubkey">add pubkey</a><br/>
                     <a href="check_pubkey">check pubkey</a><br/>
 
             """
@@ -112,6 +113,18 @@ class MainApp(object):
 
         Page += login_server.server_pubkey()
         
+        return Page
+
+    @cherrypy.expose
+    def add_pubkey(self):
+        Page = startHTML
+
+        data = login_server.add_pubkey()
+
+        Page += f"""
+        Login Server Record: {data['loginserver_record']}<br/>           
+        """
+
         return Page
     
     @cherrypy.expose
