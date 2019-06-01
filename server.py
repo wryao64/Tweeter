@@ -80,7 +80,10 @@ class MainApp(object):
     @cherrypy.expose
     def sign_out(self):
         """Logs the current user out, expires their session"""
-        if self.username is None or self.password is None:
+        username = cherrypy.session.get('username')
+        password = cherrypy.session.get('password')
+
+        if username is None or password is None:
             pass
         else:
             isLoggedOut = login_server.logout(self.username, self.password)
