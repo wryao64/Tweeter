@@ -48,12 +48,10 @@ def add_privatedata(username, password):
         'client_saved_at': str(ts),
         'signature': keys['signature'],
     }
-
     json_bytes = json.dumps(payload).encode('utf-8')
 
     data_object = api_helper.get_data(url, headers=headers, data=json_bytes)
-    data_str = json.dumps(data_object, indent=4)
-    print(data_str)
+    
     return data_object
 
 
@@ -116,8 +114,23 @@ def get_loginserver_record(username, password):
 
 def get_privatedata(username, password):
     """
+    Loads the saved symmetrically encrypted private data of the user
     """
+    url = 'http://cs302.kiwi.land/api/get_privatedata'
 
+    username = "wyao332"  # FOR TESTING PURPOSES
+    password = "wryao64_106379276"  # FOR TESTING PURPOSES
+    key = 'strongkey'  # FOR TESTING PURPOSE: change to take user input
+
+    headers = api_helper.create_header(username, password)
+
+    data_object = api_helper.get_data(url, headers=headers)
+
+    encrypted_data = data_object['privatedata']
+    decrypted_data = security_helper.decrypt_data(key, encrypted_data)
+    private_data = json.loads(decrypted_data)
+
+    return private_data
 
 def list_online_users(username, password):
     """

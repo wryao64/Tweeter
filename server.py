@@ -15,7 +15,7 @@ startHTML = """<html>
                     <a href="check_pubkey">check pubkey</a><br/>
                     <a href="get_loginserver_record">get login server record</a><br/>
                     <a href="add_privatedata">add private data</a><br/>
-
+                    <a href="get_privatedata">get private data</a><br/>
             """
 
 
@@ -178,6 +178,27 @@ class MainApp(object):
 
         Page += f"""
         Login Server Record: {data['loginserver_record']}<br/>           
+        """
+
+        return Page
+
+    @cherrypy.expose
+    def get_privatedata(self):
+        username = cherrypy.session.get('username')
+        password = cherrypy.session.get('password')
+
+        Page = startHTML
+
+        data = login_server.get_privatedata(username, password)
+
+        Page += f"""
+        Private Keys: {data['prikeys']}<br/>
+        Blocked Public Keys: {data['blocked_pubkeys']}<br/>
+        Blocked Usernames: {data['blocked_usernames']}<br/>
+        Blocked Words: {data['blocked_words']}<br/>
+        Blocked Message Signatures: {data['blocked_message_signatures']}<br/>
+        Favourite Message Signatures: {data['favourite_message_signatures']}<br/>
+        Friends' Usernames: {data['friends_usernames']}<br/>
         """
 
         return Page

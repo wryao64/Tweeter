@@ -6,11 +6,38 @@ import nacl.signing
 import nacl.utils
 
 
+def decrypt_data(key, data):
+    """
+    Decrypts user's private data
+    """
+    box = generate_secret_box(key)
+
+    data_bytes = base64.b64decode(data)
+    decrypted_str = box.decrypt(data_bytes).decode('utf-8')
+
+    return decrypted_str
+
+
 def encrypt_data(key, data):
     """
     Encrypts user's private data using Secret Key Encryption
     """
-    # Generate secret box
+    box = generate_secret_box(key)
+
+    # Encrypt data
+    byte_data = bytes(data, encoding='utf-8')
+
+    nonce = nacl.utils.random(nacl.secret.SecretBox.NONCE_SIZE)
+    encrypted_bytes = box.encrypt(byte_data, nonce=nonce)
+    encrypted_str = base64.b64encode(encrypted_bytes).decode('utf-8')
+
+    return encrypted_str
+
+
+def generate_secret_box(key):
+    """
+    Generate secret box for Secret Key Encryption
+    """
     key_password = bytes(key, encoding='utf-8')
     salt = (key_password * 16)[:16]
     sym_key = nacl.pwhash.argon2i.kdf(
@@ -18,16 +45,7 @@ def encrypt_data(key, data):
 
     box = nacl.secret.SecretBox(sym_key)
 
-    # Encrypt data
-    byte_data = bytes(data, encoding='utf-8')
-
-    nonce = nacl.utils.random(nacl.secret.SecretBox.NONCE_SIZE)
-
-    encrypted_data = box.encrypt(byte_data, nonce=nonce)
-    encrypted_data = str(base64.b64encode(encrypted_data))
-
-    return encrypted_data
-
+    return box
 
 def get_keys(message_data=None, use_pubkey=False):
     """
