@@ -15,12 +15,44 @@ def add_privatedata():
 
 def add_pubkey():
     """
+    Associates a public key with the user's account
     """
 
 
 def check_pubkey():
     """
+    Loads the loginserver_record for a given public key
     """
+    url = "http://cs302.kiwi.land/api/check_pubkey"
+
+    username = "wyao332"  # FOR TESTING PURPOSES
+    password = "wryao64_106379276"  # FOR TESTING PURPOSES
+
+    # create HTTP BASIC authorization header
+    credentials = ('%s:%s' % (username, password))
+    b64_credentials = base64.b64encode(credentials.encode('ascii'))
+    headers = {
+        'Authorization': 'Basic %s' % b64_credentials.decode('ascii'),
+        'Content-Type': 'application/json; charset=utf-8',
+    }
+
+    # FOR TESTING PURPOSES
+    hex_key = b'cd7f971fc826eeb354c5ade4293b5e83a93c74c1aa624a2c28e6a14b97ae3d0d'
+    signing_key = nacl.signing.SigningKey(
+        hex_key, encoder=nacl.encoding.HexEncoder)
+
+    # Obtain the verify key for a given signing key
+    pubkey = signing_key.verify_key
+
+    # Serialize the verify key to send it to a third party
+    pubkey_hex = pubkey.encode(encoder=nacl.encoding.HexEncoder)
+    pubkey_hex_str = pubkey_hex.decode('utf-8')
+
+    url += "?pubkey=" + pubkey_hex_str
+
+    data_object = api_helper.getData(url, headers=headers)
+
+    return data_object
 
 
 def get_loginserver_record():
