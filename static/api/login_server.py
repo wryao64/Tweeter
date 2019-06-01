@@ -70,7 +70,7 @@ def add_privatedata(username, password):
     return data_object
 
 
-def add_pubkey():
+def add_pubkey(username, password):
     """
     Associates a public key with the user's account
     """
@@ -117,7 +117,7 @@ def add_pubkey():
     return data_object
 
 
-def check_pubkey():
+def check_pubkey(username, password):
     """
     Loads the loginserver_record for a given public key
     """
@@ -173,12 +173,12 @@ def get_loginserver_record(username, password):
     return data_object
 
 
-def get_privatedata():
+def get_privatedata(username, password):
     """
     """
 
 
-def list_online_users():
+def list_online_users(username, password):
     """
     Lists the connection details for all active users within the last five minutes
     """

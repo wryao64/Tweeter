@@ -68,6 +68,8 @@ class MainApp(object):
         if isLoggedIn == True:
             cherrypy.session['username'] = username
             cherrypy.session['password'] = password
+            self.username = username
+            self.password = password
             raise cherrypy.HTTPRedirect('/')
 
             # tell user they are online
@@ -78,13 +80,10 @@ class MainApp(object):
     @cherrypy.expose
     def sign_out(self):
         """Logs the current user out, expires their session"""
-        username = cherrypy.session.get('username')
-        password = cherrypy.session.get('password')
-
-        if username is None or password is None:
+        if self.username is None or self.password is None:
             pass
         else:
-            isLoggedOut = login_server.logout(username, password)
+            isLoggedOut = login_server.logout(self.username, self.password)
 
             if isLoggedOut == True:
                 cherrypy.lib.sessions.expire()
@@ -92,9 +91,12 @@ class MainApp(object):
     
     @cherrypy.expose
     def list_online_users(self):
+        username = cherrypy.session.get('username')
+        password = cherrypy.session.get('password')
+
         Page = startHTML
 
-        users = login_server.list_online_users()
+        users = login_server.list_online_users(username, password)
 
         for user in users:
             Page += f"""
@@ -130,9 +132,12 @@ class MainApp(object):
 
     @cherrypy.expose
     def add_pubkey(self):
+        username = cherrypy.session.get('username')
+        password = cherrypy.session.get('password')
+
         Page = startHTML
 
-        data = login_server.add_pubkey()
+        data = login_server.add_pubkey(username, password)
 
         Page += f"""
         Login Server Record: {data['loginserver_record']}<br/>           
@@ -142,9 +147,12 @@ class MainApp(object):
     
     @cherrypy.expose
     def check_pubkey(self):
+        username = cherrypy.session.get('username')
+        password = cherrypy.session.get('password')
+
         Page = startHTML
 
-        data = login_server.check_pubkey()
+        data = login_server.check_pubkey(username, password)
 
         Page += f"""
         Login Server Record: {data['loginserver_record']}<br/>
@@ -158,9 +166,12 @@ class MainApp(object):
     
     @cherrypy.expose
     def get_loginserver_record(self):
+        username = cherrypy.session.get('username')
+        password = cherrypy.session.get('password')
+
         Page = startHTML
 
-        data = login_server.get_loginserver_record()
+        data = login_server.get_loginserver_record(username, password)
 
         Page += f"""
         Login Server Record: {data['loginserver_record']}<br/>           
