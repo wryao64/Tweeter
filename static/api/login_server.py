@@ -32,15 +32,7 @@ def add_privatedata(username, password):
     loginserver_record = get_loginserver_record(username, password)
     ts = time.time()
 
-    hex_key = b'cd7f971fc826eeb354c5ade4293b5e83a93c74c1aa624a2c28e6a14b97ae3d0d'
-    signing_key = nacl.signing.SigningKey(hex_key, encoder=nacl.encoding.HexEncoder)
-
-    # Message
-    message_bytes = bytes(encrypted_data + loginserver_record + ts, encoding='utf-8')
-
-    # Sign message with signing/private key
-    signed = signing_key.sign(message_bytes, encoder=nacl.encoding.HexEncoder)
-    signature_hex_str = signed.signature.decode('utf-8')
+    keys = api_helper.get_keys(encrypted_data + loginserver_record + ts)  # FOR TESTING PURPOSES
 
     headers = api_helper.create_header(username, password)
 
@@ -48,7 +40,7 @@ def add_privatedata(username, password):
         'privatedata': encrypted_data,
         'loginserver_record': loginserver_record,
         'client_saved_at': ts,
-        'signature': signature_hex_str,
+        'signature': keys['signature'],
     }
 
     json_bytes = json.dumps(payload).encode('utf-8')
@@ -65,31 +57,14 @@ def add_pubkey(username, password):
 
     username = "wyao332"  # FOR TESTING PURPOSES
     password = "wryao64_106379276"  # FOR TESTING PURPOSES
-
-    # hex_key = nacl.signing.SigningKey.generate().encode(encoder=nacl.encoding.HexEncoder)
-    hex_key = b'cd7f971fc826eeb354c5ade4293b5e83a93c74c1aa624a2c28e6a14b97ae3d0d'
-    signing_key = nacl.signing.SigningKey(hex_key, encoder=nacl.encoding.HexEncoder)
-
-    # Obtain the verify key for a given signing key
-    pubkey = signing_key.verify_key
-
-    # Serialize the verify key to send it to a third party
-    pubkey_hex = pubkey.encode(encoder=nacl.encoding.HexEncoder)
-    pubkey_hex_str = pubkey_hex.decode('utf-8')
-
-    # Message
-    message_bytes = bytes(pubkey_hex_str + username, encoding='utf-8')
-
-    # Sign message with signing/private key
-    signed = signing_key.sign(message_bytes, encoder=nacl.encoding.HexEncoder)
-    signature_hex_str = signed.signature.decode('utf-8')
+    keys = api_helper.get_keys(username, True)  # FOR TESTING PURPOSES
 
     headers = api_helper.create_header(username, password)
 
     payload = {
-        "pubkey": pubkey_hex_str,
+        "pubkey": keys['pubkey'],
         "username": username,
-        "signature": signature_hex_str,
+        "signature": keys['signature'],
     }
 
     json_bytes = json.dumps(payload).encode('utf-8')
@@ -106,22 +81,11 @@ def check_pubkey(username, password):
 
     username = "wyao332"  # FOR TESTING PURPOSES
     password = "wryao64_106379276"  # FOR TESTING PURPOSES
+    keys = api_helper.get_keys()  # FOR TESTING PURPOSES
 
     headers = api_helper.create_header(username, password)
 
-    # FOR TESTING PURPOSES
-    hex_key = b'cd7f971fc826eeb354c5ade4293b5e83a93c74c1aa624a2c28e6a14b97ae3d0d'
-    signing_key = nacl.signing.SigningKey(
-        hex_key, encoder=nacl.encoding.HexEncoder)
-
-    # Obtain the verify key for a given signing key
-    pubkey = signing_key.verify_key
-
-    # Serialize the verify key to send it to a third party
-    pubkey_hex = pubkey.encode(encoder=nacl.encoding.HexEncoder)
-    pubkey_hex_str = pubkey_hex.decode('utf-8')
-
-    url += "?pubkey=" + pubkey_hex_str
+    url += "?pubkey=" + keys['pubkey']
 
     data_object = api_helper.get_data(url, headers=headers)
     return data_object
@@ -202,31 +166,14 @@ def ping(username, password):
 
     username = "wyao332"  # FOR TESTING PURPOSES
     password = "wryao64_106379276"  # FOR TESTING PURPOSES
-
-    # FOR TESTING PURPOSES
-    hex_key = b'cd7f971fc826eeb354c5ade4293b5e83a93c74c1aa624a2c28e6a14b97ae3d0d'
-
-    signing_key = nacl.signing.SigningKey(
-        hex_key, encoder=nacl.encoding.HexEncoder)
-
-    # Obtain the verify key for a given signing key
-    pubkey = signing_key.verify_key
-
-    # Serialize the verify key to send it to a third party
-    pubkey_hex = pubkey.encode(encoder=nacl.encoding.HexEncoder)
-    pubkey_hex_str = pubkey_hex.decode('utf-8')
-
-    # Sign pubkey with signing/private key
-    pubkey_bytes = bytes(pubkey_hex_str, encoding='utf-8')
-    signed = signing_key.sign(pubkey_bytes, encoder=nacl.encoding.HexEncoder)
-    signature_hex_str = signed.signature.decode('utf-8')
+    keys = api_helper.get_keys()  # FOR TESTING PURPOSES
 
     headers = api_helper.create_header(username, password)
 
     payload = {
-        "pubkey": pubkey_hex_str,
+        "pubkey": keys['pubkey'],
         "username": username,
-        "signature": signature_hex_str,
+        "signature": keys['signature'],
     }
 
     json_bytes = json.dumps(payload).encode('utf-8')
@@ -241,30 +188,16 @@ def report_user_status(username, password, status='online'):
     """
     username = "wyao332"  # FOR TESTING PURPOSES
     password = "wryao64_106379276"  # FOR TESTING PURPOSES
-
-    # FOR TESTING PURPOSES
-    print("Log on/off attempt from {0}:{1}\n".format(username, password))
+    keys = api_helper.get_keys()  # FOR TESTING PURPOSES
 
     url = 'http://cs302.kiwi.land/api/report'
-
-    # FOR TESTING PURPOSES
-    hex_key = b'cd7f971fc826eeb354c5ade4293b5e83a93c74c1aa624a2c28e6a14b97ae3d0d'
-    signing_key = nacl.signing.SigningKey(
-        hex_key, encoder=nacl.encoding.HexEncoder)
-
-    # Obtain the verify key for a given signing key
-    pubkey = signing_key.verify_key
-
-    # Serialize the verify key to send it to a third party
-    pubkey_hex = pubkey.encode(encoder=nacl.encoding.HexEncoder)
-    pubkey_hex_str = pubkey_hex.decode('utf-8')
 
     headers = api_helper.create_header(username, password)
 
     payload = {
         "connection_address": "127.0.0.1:8000",
         "connection_location": "2",
-        "incoming_pubkey": pubkey_hex_str,
+        "incoming_pubkey": keys['pubkey'],
         "status": status,
     }
 
