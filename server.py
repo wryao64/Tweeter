@@ -14,6 +14,8 @@ startHTML = """<html>
                     <a href="add_pubkey">add pubkey</a><br/>
                     <a href="check_pubkey">check pubkey</a><br/>
                     <a href="get_loginserver_record">get login server record</a><br/>
+                    <a href="add_privatedata">add private data</a><br/>
+
             """
 
 
@@ -113,6 +115,17 @@ class MainApp(object):
 
         Page += login_server.server_pubkey()
         
+        return Page
+    
+    @cherrypy.expose
+    def add_privatedata(self):
+        username = cherrypy.session.get('username')
+        password = cherrypy.session.get('password')
+
+        Page = startHTML
+
+        data = login_server.add_privatedata(username, password)
+
         return Page
 
     @cherrypy.expose

@@ -8,9 +8,66 @@ import time
 import static.utils.api_helper as api_helper
 
 
-def add_privatedata():
+def add_privatedata(username, password):
     """
+    Saves symmetrically encrypted private data for a user
     """
+    url = 'http://cs302.kiwi.land/api/add_privatedata'
+
+    username = "wyao332"  # FOR TESTING PURPOSES
+    password = "wryao64_106379276"  # FOR TESTING PURPOSES
+
+    data = {
+        'prikeys': [],
+        'blocked_pubkeys': [],
+        'blocked_usernames': [],
+        'blocked_words': [],
+        'blocked_message_signatures': [],
+        'friends_usernames': [],
+    }
+
+    # encrypt data
+    encrypted_data = data  # TODO: ENCRYPT
+
+    loginserver_record = get_loginserver_record(username, password)
+    ts = time.time()
+
+    hex_key = b'cd7f971fc826eeb354c5ade4293b5e83a93c74c1aa624a2c28e6a14b97ae3d0d'
+    signing_key = nacl.signing.SigningKey(hex_key, encoder=nacl.encoding.HexEncoder)
+
+    # Obtain the verify key for a given signing key
+    pubkey = signing_key.verify_key
+
+    # Serialize the verify key to send it to a third party
+    pubkey_hex = pubkey.encode(encoder=nacl.encoding.HexEncoder)
+    pubkey_hex_str = pubkey_hex.decode('utf-8')
+
+    # Message
+    message_bytes = bytes(pubkey_hex_str + username, encoding='utf-8')
+
+    # Sign message with signing/private key
+    signed = signing_key.sign(message_bytes, encoder=nacl.encoding.HexEncoder)
+    signature_hex_str = signed.signature.decode('utf-8')
+
+    # create HTTP BASIC authorization header
+    credentials = ('%s:%s' % (username, password))
+    b64_credentials = base64.b64encode(credentials.encode('ascii'))
+    headers = {
+        'Authorization': 'Basic %s' % b64_credentials.decode('ascii'),
+        'Content-Type': 'application/json; charset=utf-8',
+    }
+
+    payload = {
+        'privatedata': encrypted_data,
+        'loginserver_record': loginserver_record,
+        'client_saved_at': ts,
+        'signature': signature_hex_str,
+    }
+
+    json_bytes = json.dumps(payload).encode('utf-8')
+
+    data_object = api_helper.getData(url, headers=headers, data=json_bytes)
+    return data_object
 
 
 def add_pubkey():
@@ -95,7 +152,7 @@ def check_pubkey():
     return data_object
 
 
-def get_loginserver_record():
+def get_loginserver_record(username, password):
     """
     Loads the user's current loginserver_record for use in creating point-to-point messages.
     """
