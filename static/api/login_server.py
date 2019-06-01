@@ -49,13 +49,7 @@ def add_privatedata(username, password):
     signed = signing_key.sign(message_bytes, encoder=nacl.encoding.HexEncoder)
     signature_hex_str = signed.signature.decode('utf-8')
 
-    # create HTTP BASIC authorization header
-    credentials = ('%s:%s' % (username, password))
-    b64_credentials = base64.b64encode(credentials.encode('ascii'))
-    headers = {
-        'Authorization': 'Basic %s' % b64_credentials.decode('ascii'),
-        'Content-Type': 'application/json; charset=utf-8',
-    }
+    headers = api_helper.create_header(username, password)
 
     payload = {
         'privatedata': encrypted_data,
@@ -66,7 +60,7 @@ def add_privatedata(username, password):
 
     json_bytes = json.dumps(payload).encode('utf-8')
 
-    data_object = api_helper.getData(url, headers=headers, data=json_bytes)
+    data_object = api_helper.get_data(url, headers=headers, data=json_bytes)
     return data_object
 
 
@@ -97,13 +91,7 @@ def add_pubkey(username, password):
     signed = signing_key.sign(message_bytes, encoder=nacl.encoding.HexEncoder)
     signature_hex_str = signed.signature.decode('utf-8')
 
-    # create HTTP BASIC authorization header
-    credentials = ('%s:%s' % (username, password))
-    b64_credentials = base64.b64encode(credentials.encode('ascii'))
-    headers = {
-        'Authorization': 'Basic %s' % b64_credentials.decode('ascii'),
-        'Content-Type': 'application/json; charset=utf-8',
-    }
+    headers = api_helper.create_header(username, password)
 
     payload = {
         "pubkey": pubkey_hex_str,
@@ -113,7 +101,7 @@ def add_pubkey(username, password):
 
     json_bytes = json.dumps(payload).encode('utf-8')
 
-    data_object = api_helper.getData(url, headers=headers, data=json_bytes)
+    data_object = api_helper.get_data(url, headers=headers, data=json_bytes)
     return data_object
 
 
@@ -126,13 +114,7 @@ def check_pubkey(username, password):
     username = "wyao332"  # FOR TESTING PURPOSES
     password = "wryao64_106379276"  # FOR TESTING PURPOSES
 
-    # create HTTP BASIC authorization header
-    credentials = ('%s:%s' % (username, password))
-    b64_credentials = base64.b64encode(credentials.encode('ascii'))
-    headers = {
-        'Authorization': 'Basic %s' % b64_credentials.decode('ascii'),
-        'Content-Type': 'application/json; charset=utf-8',
-    }
+    headers = api_helper.create_header(username, password)
 
     # FOR TESTING PURPOSES
     hex_key = b'cd7f971fc826eeb354c5ade4293b5e83a93c74c1aa624a2c28e6a14b97ae3d0d'
@@ -148,7 +130,7 @@ def check_pubkey(username, password):
 
     url += "?pubkey=" + pubkey_hex_str
 
-    data_object = api_helper.getData(url, headers=headers)
+    data_object = api_helper.get_data(url, headers=headers)
     return data_object
 
 
@@ -161,15 +143,9 @@ def get_loginserver_record(username, password):
     username = "wyao332"  # FOR TESTING PURPOSES
     password = "wryao64_106379276"  # FOR TESTING PURPOSES
 
-    # create HTTP BASIC authorization header
-    credentials = ('%s:%s' % (username, password))
-    b64_credentials = base64.b64encode(credentials.encode('ascii'))
-    headers = {
-        'Authorization': 'Basic %s' % b64_credentials.decode('ascii'),
-        'Content-Type': 'application/json; charset=utf-8',
-    }
+    headers = api_helper.create_header(username, password)
 
-    data_object = api_helper.getData(url, headers=headers)
+    data_object = api_helper.get_data(url, headers=headers)
     return data_object
 
 
@@ -187,15 +163,9 @@ def list_online_users(username, password):
     username = "wyao332"  # FOR TESTING PURPOSES
     password = "wryao64_106379276"  # FOR TESTING PURPOSES
 
-    # create HTTP BASIC authorization header
-    credentials = ('%s:%s' % (username, password))
-    b64_credentials = base64.b64encode(credentials.encode('ascii'))
-    headers = {
-        'Authorization': 'Basic %s' % b64_credentials.decode('ascii'),
-        'Content-Type': 'application/json; charset=utf-8',
-    }
+    headers = api_helper.create_header(username, password)
 
-    data_object = api_helper.getData(url, headers)
+    data_object = api_helper.get_data(url, headers)
     users = data_object['users']
     return users
 
@@ -258,13 +228,7 @@ def ping(username, password):
     signed = signing_key.sign(pubkey_bytes, encoder=nacl.encoding.HexEncoder)
     signature_hex_str = signed.signature.decode('utf-8')
 
-    # create HTTP BASIC authorization header
-    credentials = ('%s:%s' % (username, password))
-    b64_credentials = base64.b64encode(credentials.encode('ascii'))
-    headers = {
-        'Authorization': 'Basic %s' % b64_credentials.decode('ascii'),
-        'Content-Type': 'application/json; charset=utf-8',
-    }
+    headers = api_helper.create_header(username, password)
 
     payload = {
         "pubkey": pubkey_hex_str,
@@ -274,7 +238,7 @@ def ping(username, password):
 
     json_bytes = json.dumps(payload).encode('utf-8')
 
-    data_object = api_helper.getData(url, headers, json_bytes)
+    data_object = api_helper.get_data(url, headers, json_bytes)
     return data_object['response']
 
 
@@ -302,13 +266,7 @@ def report_user_status(username, password, status='online'):
     pubkey_hex = pubkey.encode(encoder=nacl.encoding.HexEncoder)
     pubkey_hex_str = pubkey_hex.decode('utf-8')
 
-    # create HTTP BASIC authorization header
-    credentials = ('%s:%s' % (username, password))
-    b64_credentials = base64.b64encode(credentials.encode('ascii'))
-    headers = {
-        'Authorization': 'Basic %s' % b64_credentials.decode('ascii'),
-        'Content-Type': 'application/json; charset=utf-8',
-    }
+    headers = api_helper.create_header(username, password)
 
     payload = {
         "connection_address": "127.0.0.1:8000",
@@ -319,7 +277,7 @@ def report_user_status(username, password, status='online'):
 
     json_bytes = json.dumps(payload).encode('utf-8')
 
-    data_object = api_helper.getData(url, headers, json_bytes)
+    data_object = api_helper.get_data(url, headers, json_bytes)
     return data_object['response']
 
 
@@ -329,6 +287,6 @@ def server_pubkey():
     """
     url = 'http://cs302.kiwi.land/api/loginserver_pubkey'
 
-    data_object = api_helper.getData(url)
+    data_object = api_helper.get_data(url)
     pubkey = data_object['pubkey']
     return pubkey

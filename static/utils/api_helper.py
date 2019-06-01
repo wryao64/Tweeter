@@ -3,7 +3,21 @@ import json
 import base64
 
 
-def getData(url, headers=None, data=None):
+def create_header(username, password):
+    """
+    Create HTTP BASIC authorization header
+    """
+    credentials = ('%s:%s' % (username, password))
+    b64_credentials = base64.b64encode(credentials.encode('ascii'))
+    headers = {
+        'Authorization': 'Basic %s' % b64_credentials.decode('ascii'),
+        'Content-Type': 'application/json; charset=utf-8',
+    }
+
+    return headers
+
+
+def get_data(url, headers=None, data=None):
     """
     Retrieves data from API endpoint
     """
