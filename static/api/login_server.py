@@ -51,7 +51,7 @@ def add_privatedata(username, password):
     json_bytes = json.dumps(payload).encode('utf-8')
 
     data_object = api_helper.get_data(url, headers=headers, data=json_bytes)
-    
+
     return data_object
 
 
@@ -131,6 +131,7 @@ def get_privatedata(username, password):
     private_data = json.loads(decrypted_data)
 
     return private_data
+
 
 def list_online_users(username, password):
     """
@@ -228,6 +229,23 @@ def report_user_status(username, password, status='online'):
     return data_object['response']
 
 
+def load_new_apikey(username, password):
+    """
+    Returns a new API key for authentication for the rest of the session
+    Note: implemented for future use
+    """
+    username = "wyao332"  # FOR TESTING PURPOSES
+    password = "wryao64_106379276"  # FOR TESTING PURPOSES
+
+    url = 'http://cs302.kiwi.land/api/load_new_apikey'
+
+    headers = api_helper.create_header(username, password)
+    data_object = api_helper.get_data(url, headers)
+
+    return data_object
+
+
+
 def server_pubkey():
     """
     Returns the public key of the login server
@@ -237,6 +255,7 @@ def server_pubkey():
     data_object = api_helper.get_data(url)
     pubkey = data_object['pubkey']
     return pubkey
+
 
 def list_apis():
     """

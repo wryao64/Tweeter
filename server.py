@@ -17,6 +17,7 @@ startHTML = """<html>
                     <a href="add_privatedata">add private data</a><br/>
                     <a href="get_privatedata">get private data</a><br/>
                     <a href="list_apis">list apis</a><br/>
+                    <a href="load_new_apikey">load new apikey</a><br/>
             """
 
 
@@ -93,6 +94,7 @@ class MainApp(object):
                 cherrypy.lib.sessions.expire()
             raise cherrypy.HTTPRedirect('/')
 
+    # Unsorted
     @cherrypy.expose
     def list_online_users(self):
         username = cherrypy.session.get('username')
@@ -226,5 +228,18 @@ class MainApp(object):
                 Purpose: {data[d]['purpose']}<br/>
                 <br/>
                 """
+
+        return Page
+
+    @cherrypy.expose
+    def load_new_apikey(self):
+        username = cherrypy.session.get('username')
+        password = cherrypy.session.get('password')
+
+        Page = startHTML
+
+        data = login_server.load_new_apikey(username, password)
+
+        Page += data['api_key']
 
         return Page
