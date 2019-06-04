@@ -70,8 +70,6 @@ class MainApp(object):
         if isLoggedIn == True:
             cherrypy.session['username'] = username
             cherrypy.session['password'] = password
-            self.username = username
-            self.password = password
             raise cherrypy.HTTPRedirect('/')
 
             # tell user they are online
