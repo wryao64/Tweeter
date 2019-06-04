@@ -25,9 +25,6 @@ startHTML = """<html>
                     <a href="list_apis">list apis</a><br/>
                     <a href="load_new_apikey">load new apikey</a><br/>
 
-                    <h1>API endpoints</h1> 
-                    <a href="api/rx_broadcast">rx_broadcast</a><br/> 
-
                     <br/>                   
 
             """
@@ -54,11 +51,30 @@ class MainApp(object):
         Page = startHTML + 'Welcome! This is the base website!<br/>'
 
         try:
-            Page += 'Hello ' + cherrypy.session['username'] + '!<br/>'
+            username = cherrypy.session['username']
+            password = cherrypy.session['password']
+
+            Page += 'Hello ' + str(username) + '!<br/>'
             Page += 'You have logged in! <a href="/sign_out">Sign out</a>'
+
+            Page += '<form action="/broadcast_message" method="post" enctype="multipart/form-data">'
+            Page += 'Message: <input type="message" name="message"/><br/>'
+            Page += '<input type="submit" value="Send"/></form>'
         except KeyError:  # There is no username
             Page += 'Click here to <a href="login">login</a>.'
         return Page
+
+    @cherrypy.expose
+    def broadcast_message(self, message=None):
+        username = cherrypy.session.get('username')
+        password = cherrypy.session.get('password')
+
+        response = client_outgoing_request.broadcast(username, password, message)
+
+        if response['response'] == 'ok':
+            raise cherrypy.HTTPRedirect('/')
+        else:
+            raise cherrypy.HTTPRedirect('/')
 
     @cherrypy.expose
     def login(self, bad_attempt=0):
