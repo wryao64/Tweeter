@@ -16,9 +16,18 @@ def broadcast(login_server_record, message, sender_created_at, signature):
         loginserver_record + message + str(ts))  # FOR TESTING PURPOSES
     signature = keys['signature']
 
+    # authenticate
+
+    # post to webpage
+    print("Message: " + message)
+
     data_object = {
         'response': 'ok'
     }
+    # data_object = {
+    #     'response': 'error',
+    #     'message': 'Error: ###',
+    # }
     json_object = json.dumps(data_object)
 
     return json_object
