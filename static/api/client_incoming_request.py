@@ -19,8 +19,9 @@ def broadcast(login_server_record, message, sender_created_at, signature):
     data_object = {
         'response': 'ok'
     }
+    json_object = json.dumps(data_object)
 
-    return data_object
+    return json_object
 
 
 def private_message(login_server_record, target_pubkey, target_username, encrypted_message, sender_created_at, signature):
