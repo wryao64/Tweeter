@@ -11,6 +11,9 @@ startHTML = """<html>
                 </head>
                 
                 <body>
+                    <a href="/">home</a><br/>
+
+                    <h1>LS endpoints</h1>
                     <a href="list_online_users">list online users</a><br/>
                     <a href="server_pubkey">server pubkey</a><br/>
                     <a href="add_pubkey">add pubkey</a><br/>
@@ -20,6 +23,12 @@ startHTML = """<html>
                     <a href="get_privatedata">get private data</a><br/>
                     <a href="list_apis">list apis</a><br/>
                     <a href="load_new_apikey">load new apikey</a><br/>
+
+                    <h1>API endpoints</h1> 
+                    <a href="api/rx_broadcast">rx_broadcast</a><br/> 
+
+                    <br/>                   
+
             """
 
 
@@ -250,7 +259,15 @@ class ApiApp(object):
         username = cherrypy.session.get('username')
         password = cherrypy.session.get('password')
 
-        client_server.broadcast(username, password)
+        Page = startHTML
+
+        data = client_server.broadcast(username, password)
+
+        Page += f"""
+        Response: {data['response']}<br/>
+        """
+
+        return Page
 
     @cherrypy.expose
     def rx_privatemessage(self):
