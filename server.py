@@ -2,6 +2,7 @@ import cherrypy
 
 import static.api.login_server as login_server
 import static.api.client_server as client_server
+import static.api.client_incoming_request as client_incoming_request
 
 
 startHTML = """<html>
@@ -255,19 +256,18 @@ class MainApp(object):
 
 class ApiApp(object):
     @cherrypy.expose
+    @cherrypy.tools.json_in()
+    @cherrypy.tools.json_out()
     def rx_broadcast(self):
-        username = cherrypy.session.get('username')
-        password = cherrypy.session.get('password')
+        login_server_record = cherrypy.request.json['loginserver_record']
+        message = cherrypy.request.json['message']
+        sender_created_at = cherrypy.request.json['sender_created_at']
+        signature = cherrypy.request.json['signature']
 
-        Page = startHTML
+        response = client_incoming_request.broadcast(
+            login_server_record, message, sender_created_at, signature)
 
-        data = client_server.broadcast(username, password)
-
-        Page += f"""
-        Response: {data['response']}<br/>
-        """
-
-        return Page
+        return response
 
     @cherrypy.expose
     def rx_privatemessage(self):
@@ -275,14 +275,14 @@ class ApiApp(object):
         password = cherrypy.session.get('password')
 
         client_server.private_message(username, password)
-    
+
     @cherrypy.expose
     def checkmessages(self):
         username = cherrypy.session.get('username')
         password = cherrypy.session.get('password')
 
         client_server.check_messages(username, password)
-    
+
     @cherrypy.expose
     def ping_check(self):
         username = cherrypy.session.get('username')
