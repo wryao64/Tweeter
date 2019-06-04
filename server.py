@@ -88,7 +88,7 @@ class MainApp(object):
         if username is None or password is None:
             pass
         else:
-            isLoggedOut = login_server.logout(self.username, self.password)
+            isLoggedOut = login_server.logout(username, password)
 
             if isLoggedOut == True:
                 cherrypy.lib.sessions.expire()
