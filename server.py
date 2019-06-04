@@ -241,3 +241,28 @@ class MainApp(object):
         Page += data['api_key']
 
         return Page
+
+class ApiApp(object):
+    @cherrypy.expose
+    def rx_broadcast(self):
+        #
+
+    @cherrypy.expose
+    def rx_privatemessage(self):
+        #
+    
+    @cherrypy.expose
+    def checkmessages(self):
+        #
+    
+    @cherrypy.expose
+    def ping_check(self):
+        #
+
+    @cherrypy.expose
+    def rx_groupmessage(self):
+        #
+
+    @cherrypy.expose
+    def rx_groupinvite(self):
+        #
