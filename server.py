@@ -1,6 +1,8 @@
 import cherrypy
 
 import static.api.login_server as login_server
+import static.api.client_server as client_server
+
 
 startHTML = """<html>
                 <head>
@@ -245,24 +247,42 @@ class MainApp(object):
 class ApiApp(object):
     @cherrypy.expose
     def rx_broadcast(self):
-        #
+        username = cherrypy.session.get('username')
+        password = cherrypy.session.get('password')
+
+        client_server.broadcast(username, password)
 
     @cherrypy.expose
     def rx_privatemessage(self):
-        #
+        username = cherrypy.session.get('username')
+        password = cherrypy.session.get('password')
+
+        client_server.private_message(username, password)
     
     @cherrypy.expose
     def checkmessages(self):
-        #
+        username = cherrypy.session.get('username')
+        password = cherrypy.session.get('password')
+
+        client_server.check_messages(username, password)
     
     @cherrypy.expose
     def ping_check(self):
-        #
+        username = cherrypy.session.get('username')
+        password = cherrypy.session.get('password')
+
+        client_server.ping_check(username, password)
 
     @cherrypy.expose
     def rx_groupmessage(self):
-        #
+        username = cherrypy.session.get('username')
+        password = cherrypy.session.get('password')
+
+        client_server.group_message(username, password)
 
     @cherrypy.expose
     def rx_groupinvite(self):
-        #
+        username = cherrypy.session.get('username')
+        password = cherrypy.session.get('password')
+
+        client_server.group_invite(username, password)

@@ -36,7 +36,7 @@ def runMainApp():
         'base_path': os.getcwd()
     }
 
-    # Create an instance of MainApp and tell CherryPy to send all requests under / to it. (i.e. all of them)
+    # Create an instance of server Apps and tell CherryPy to send all requests to relevant endpoints
     cherrypy.tree.mount(server.MainApp(), "/", conf)
     cherrypy.tree.mount(server.ApiApp(), "/api/", conf)
 
