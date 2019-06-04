@@ -271,35 +271,26 @@ class ApiApp(object):
 
     @cherrypy.expose
     def rx_privatemessage(self):
-        username = cherrypy.session.get('username')
-        password = cherrypy.session.get('password')
-
-        client_outgoing_request.private_message(username, password)
+        # client_incoming_request.private_message(login_server_record, target_pubkey, target_username, encrypted_message, sender_created_at, signature)
+        pass
 
     @cherrypy.expose
     def checkmessages(self):
-        username = cherrypy.session.get('username')
-        password = cherrypy.session.get('password')
-
-        client_outgoing_request.check_messages(username, password)
+        # client_incoming_request.check_messages(since)
+        pass
 
     @cherrypy.expose
     def ping_check(self):
-        username = cherrypy.session.get('username')
-        password = cherrypy.session.get('password')
-
-        client_outgoing_request.ping_check(username, password)
+        # client_incoming_request.ping_check(my_time, my_active_usernames, connection_address, connection_location)
+        pass
 
     @cherrypy.expose
     def rx_groupmessage(self):
-        username = cherrypy.session.get('username')
-        password = cherrypy.session.get('password')
-
-        client_outgoing_request.group_message(username, password)
+        # client_incoming_request.group_message(login_server_record, group_key_hash, group_message, sender_created_at, signature)
+        pass
 
     @cherrypy.expose
     def rx_groupinvite(self):
-        username = cherrypy.session.get('username')
-        password = cherrypy.session.get('password')
+        # client_incoming_request.group_invite(login_server_record, group_key_hash, target_pubkey, targer_username, encrypted_group_key, sender_created_at, signature)
+        pass
 
-        client_outgoing_request.group_invite(username, password)
