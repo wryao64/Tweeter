@@ -3,6 +3,7 @@ import cherrypy
 import static.api.login_server as login_server
 import static.api.client_outgoing_request as client_outgoing_request
 import static.api.client_incoming_request as client_incoming_request
+import static.repositories.broadcast_repository as broadcast_repository
 
 
 startHTML = """<html>
@@ -52,14 +53,21 @@ class MainApp(object):
 
         try:
             username = cherrypy.session['username']
-            password = cherrypy.session['password']
 
             Page += 'Hello ' + str(username) + '!<br/>'
             Page += 'You have logged in! <a href="/sign_out">Sign out</a>'
 
             Page += '<form action="/broadcast_message" method="post" enctype="multipart/form-data">'
             Page += 'Message: <input type="message" name="message"/><br/>'
-            Page += '<input type="submit" value="Send"/></form>'
+            Page += '<input type="submit" value="Send"/></form><br/><br/>'
+
+            broadcasts = broadcast_repository.get_broadcasts()
+
+            if len(broadcasts) == 0:
+                Page += 'There are no broadcasts'
+            else:
+                for broadcast in broadcasts:
+                    Page += str(broadcast) + '<br/><br/>'
         except KeyError:  # There is no username
             Page += 'Click here to <a href="login">login</a>.'
         return Page

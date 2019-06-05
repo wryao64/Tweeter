@@ -3,22 +3,18 @@ import time
 
 import static.utils.api_helper as api_helper
 import static.utils.security_helper as security_helper
+import static.repositories.broadcast_repository as broadcast_repository
 
 
 def broadcast(loginserver_record, message, sender_created_at, signature):
     """
     Transmits a signed broadcast between users
     """
-    loginserver_record = 'wyao332,69592f14f52422ecf713b21f1615da2fec7d67eb7f0a8c4d3a72121d8e49cb66,1559114951.7035556,d0a5992d76f5f5464ddc0a530d8ea5f8a99b0fde4e0a3d4b91d100b7515188929ef22801420f25cc0b0f51095fa8cd9fbe6d3c93e1a93b7b2857cafdd6159a0e'
-    ts = '1559114951.7035556'
-    keys = security_helper.get_keys(
-        loginserver_record + message + str(ts))  # FOR TESTING PURPOSES
-    signature = keys['signature']
-
     # authenticate
 
-    # post to webpage
+    # send to database
     print("Message: " + message)
+    broadcast_repository.post_broadcast(loginserver_record, message, sender_created_at, signature)
 
     data_object = {
         'response': 'ok'

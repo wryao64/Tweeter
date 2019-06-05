@@ -9,7 +9,7 @@ def broadcast(username, password, message):
     """
     Transmits a signed broadcast between users
     """
-    url = "http://192.168.1.63:1025/api/rx_broadcast"
+    url = 'http://192.168.1.63:1025/api/rx_broadcast'
 
     username = "wyao332"  # FOR TESTING PURPOSES
     password = "wryao64_106379276"  # FOR TESTING PURPOSES
@@ -22,10 +22,10 @@ def broadcast(username, password, message):
     headers = api_helper.create_header(username, password)
 
     payload = {
-        "loginserver_record": loginserver_record,
-        "message": message,
-        "sender_created_at": str(ts),
-        "signature": keys['signature'],
+        'loginserver_record': loginserver_record,
+        'message': message,
+        'sender_created_at': str(ts),
+        'signature': keys['signature'],
     }
     json_bytes = json.dumps(payload).encode('utf-8')
 
