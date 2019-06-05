@@ -71,13 +71,13 @@ class MainApp(object):
         # return open('../frontend/tweeter/build/index.html')
         return Page
 
-
     @cherrypy.expose
     def broadcast_message(self, message=None):
         username = cherrypy.session.get('username')
         password = cherrypy.session.get('password')
 
-        response = client_outgoing_request.broadcast(username, password, message)
+        response = client_outgoing_request.broadcast(
+            username, password, message)
 
         if response['response'] == 'ok':
             raise cherrypy.HTTPRedirect('/')
@@ -278,6 +278,7 @@ class MainApp(object):
 
         return Page
 
+
 class ApiApp(object):
     @cherrypy.expose
     @cherrypy.tools.json_in()
@@ -297,8 +298,17 @@ class ApiApp(object):
     @cherrypy.tools.json_in()
     @cherrypy.tools.json_out()
     def rx_privatemessage(self):
-        # client_incoming_request.private_message(loginserver_record, target_pubkey, target_username, encrypted_message, sender_created_at, signature)
-        pass
+        loginserver_record = cherrypy.request.json['loginserver_record']
+        target_pubkey = cherrypy.request.json['target_pubkey']
+        target_username = cherrypy.request.json['target_username']
+        encrypted_message = cherrypy.request.json['encrypted_message']
+        sender_created_at = cherrypy.request.json['sender_created_at']
+        signature = cherrypy.request.json['signature']
+
+        response = client_incoming_request.private_message(
+            loginserver_record, target_pubkey, target_username, encrypted_message, sender_created_at, signature)
+
+        return response
 
     @cherrypy.expose
     @cherrypy.tools.json_in()
@@ -327,4 +337,3 @@ class ApiApp(object):
     def rx_groupinvite(self):
         # client_incoming_request.group_invite(loginserver_record, group_key_hash, target_pubkey, targer_username, encrypted_group_key, sender_created_at, signature)
         pass
-

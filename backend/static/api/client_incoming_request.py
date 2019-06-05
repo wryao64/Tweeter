@@ -32,7 +32,20 @@ def private_message(loginserver_record, target_pubkey, target_username, encrypte
     """
     Transmits a secret message between users.
     """
-    pass
+    # authenticate
+
+    # send to database
+
+    data_object = {
+        'response': 'ok'
+    }
+    # data_object = {
+    #     'response': 'error',
+    #     'message': 'Error: ###',
+    # }
+    json_object = json.dumps(data_object)
+
+    return json_object
 
 
 def check_messages(since):
