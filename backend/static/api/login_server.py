@@ -6,8 +6,8 @@ import nacl.encoding
 import nacl.signing
 import time
 
-import backend.static.utils.api_helper as api_helper
-import backend.static.utils.security_helper as security_helper
+import static.utils.api_helper as api_helper
+import static.utils.security_helper as security_helper
 
 
 def add_privatedata(username, password):

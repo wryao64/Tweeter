@@ -1,10 +1,7 @@
 import json
-import time
 
-import backend.static.utils.api_helper as api_helper
-import backend.static.utils.security_helper as security_helper
-import backend.static.repositories.broadcast_repository as broadcast_repository
-
+import static.repositories.broadcast_repository as broadcast_repository
+import static.repositories.private_message_repository as private_message_repository
 
 def broadcast(loginserver_record, message, sender_created_at, signature):
     """
@@ -35,6 +32,7 @@ def private_message(loginserver_record, target_pubkey, target_username, encrypte
     # authenticate
 
     # send to database
+    private_message_repository.post_broadcast(loginserver_record, target_pubkey, target_username, encrypted_message, sender_created_at, signature)
 
     data_object = {
         'response': 'ok'

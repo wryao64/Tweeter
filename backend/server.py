@@ -4,6 +4,7 @@ import static.api.login_server as login_server
 import static.api.client_outgoing_request as client_outgoing_request
 import static.api.client_incoming_request as client_incoming_request
 import static.repositories.broadcast_repository as broadcast_repository
+import static.repositories.private_message_repository as private_message_repository
 
 
 startHTML = """<html>
@@ -55,9 +56,19 @@ class MainApp(object):
             Page += 'Hello ' + cherrypy.session['username'] + '!<br/>'
             Page += 'You have logged in! <a href="/sign_out">Sign out</a>'
 
-            Page += '<form action="/broadcast_message" method="post" enctype="multipart/form-data">'
-            Page += 'Message: <input type="message" name="message"/><br/>'
-            Page += '<input type="submit" value="Send"/></form><br/><br/>'
+            Page += """
+            <h3>Broadcast Message</h3>
+            <form action="/broadcast_message" method="post" enctype="multipart/form-data">
+            Message: <input type="message" name="message"/><br/>
+            <input type="submit" value="Send"/></form><br/>
+            <br/>
+            <h3>Private Message</h3>
+            <form action="/private_message" method="post" enctype="multipart/form-data">
+            Message: <input type="message" name="message"/><br/>
+            <input type="submit" value="Send"/></form><br/>
+            <br/>
+            <h3>Broadcasts</h3>
+            """
 
             broadcasts = broadcast_repository.get_broadcasts()
 
@@ -66,6 +77,15 @@ class MainApp(object):
             else:
                 for broadcast in broadcasts:
                     Page += str(broadcast) + '<br/><br/>'
+
+            private_messages = private_message_repository.get_messages()
+
+            Page += '<h3>Private Messages</h3>'
+            if len(private_messages) == 0:
+                Page += 'There are no messages'
+            else:
+                for message in private_messages:
+                    Page += str(message) + '<br/><br/>'
         except KeyError:  # There is no username
             Page += 'Click here to <a href="login">login</a>.'
         # return open('../frontend/tweeter/build/index.html')
@@ -78,6 +98,19 @@ class MainApp(object):
 
         response = client_outgoing_request.broadcast(
             username, password, message)
+
+        if response['response'] == 'ok':
+            raise cherrypy.HTTPRedirect('/')
+        else:
+            raise cherrypy.HTTPRedirect('/')
+
+    @cherrypy.expose
+    def private_message(self, message=None):
+        username = cherrypy.session.get('username')
+        password = cherrypy.session.get('password')
+
+        response = client_outgoing_request.private_message(
+            username, password)
 
         if response['response'] == 'ok':
             raise cherrypy.HTTPRedirect('/')

@@ -35,4 +35,4 @@ def post_broadcast(loginserver_record, target_pubkey, target_username, encrypted
     with sqlite3.connect(DB_STRING) as c:
         c.execute("""INSERT INTO PRIVATE_MESSAGES
         (loginserver_record, target_pubkey, target_username, encrypted_message, sender_created_at, signature)
-        VALUES (?, ?, ?, ?)""", (loginserver_record, target_pubkey, target_username, encrypted_message, sender_created_at, signature))
+        VALUES (?, ?, ?, ?, ?, ?)""", (loginserver_record, target_pubkey, target_username, encrypted_message, sender_created_at, signature))
