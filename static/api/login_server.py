@@ -1,3 +1,4 @@
+import cherrypy
 import urllib.request
 import json
 import base64
@@ -208,6 +209,11 @@ def report_user_status(username, password, status='online'):
     """
     Informs the login server about connection information for the user
     """
+    host = cherrypy.config.get('server.socket_host')
+    port = cherrypy.config.get('server.socket_port')
+    connection_address = f'{host}:{port}'
+    connection_location = '2'
+
     username = "wyao332"  # FOR TESTING PURPOSES
     password = "wryao64_106379276"  # FOR TESTING PURPOSES
     keys = security_helper.get_keys()  # FOR TESTING PURPOSES
@@ -217,10 +223,10 @@ def report_user_status(username, password, status='online'):
     headers = api_helper.create_header(username, password)
 
     payload = {
-        "connection_address": "127.0.0.1:8000",
-        "connection_location": "2",
-        "incoming_pubkey": keys['pubkey'],
-        "status": status,
+        'connection_address': connection_address,
+        'connection_location': connection_location,
+        'incoming_pubkey': keys['pubkey'],
+        'status': status,
     }
 
     json_bytes = json.dumps(payload).encode('utf-8')
