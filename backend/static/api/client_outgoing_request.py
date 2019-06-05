@@ -1,8 +1,8 @@
 import json
 import time
 
-import static.utils.api_helper as api_helper
-import static.utils.security_helper as security_helper
+import backend.static.utils.api_helper as api_helper
+import backend.static.utils.security_helper as security_helper
 
 
 def broadcast(username, password, message):

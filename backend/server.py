@@ -68,7 +68,9 @@ class MainApp(object):
                     Page += str(broadcast) + '<br/><br/>'
         except KeyError:  # There is no username
             Page += 'Click here to <a href="login">login</a>.'
+        # return open('../frontend/tweeter/build/index.html')
         return Page
+
 
     @cherrypy.expose
     def broadcast_message(self, message=None):
@@ -292,26 +294,36 @@ class ApiApp(object):
         return response
 
     @cherrypy.expose
+    @cherrypy.tools.json_in()
+    @cherrypy.tools.json_out()
     def rx_privatemessage(self):
         # client_incoming_request.private_message(loginserver_record, target_pubkey, target_username, encrypted_message, sender_created_at, signature)
         pass
 
     @cherrypy.expose
+    @cherrypy.tools.json_in()
+    @cherrypy.tools.json_out()
     def checkmessages(self):
         # client_incoming_request.check_messages(since)
         pass
 
     @cherrypy.expose
+    @cherrypy.tools.json_in()
+    @cherrypy.tools.json_out()
     def ping_check(self):
         # client_incoming_request.ping_check(my_time, my_active_usernames, connection_address, connection_location)
         pass
 
     @cherrypy.expose
+    @cherrypy.tools.json_in()
+    @cherrypy.tools.json_out()
     def rx_groupmessage(self):
         # client_incoming_request.group_message(loginserver_record, group_key_hash, group_message, sender_created_at, signature)
         pass
 
     @cherrypy.expose
+    @cherrypy.tools.json_in()
+    @cherrypy.tools.json_out()
     def rx_groupinvite(self):
         # client_incoming_request.group_invite(loginserver_record, group_key_hash, target_pubkey, targer_username, encrypted_group_key, sender_created_at, signature)
         pass

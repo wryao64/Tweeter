@@ -1,9 +1,9 @@
 import json
 import time
 
-import static.utils.api_helper as api_helper
-import static.utils.security_helper as security_helper
-import static.repositories.broadcast_repository as broadcast_repository
+import backend.static.utils.api_helper as api_helper
+import backend.static.utils.security_helper as security_helper
+import backend.static.repositories.broadcast_repository as broadcast_repository
 
 
 def broadcast(loginserver_record, message, sender_created_at, signature):

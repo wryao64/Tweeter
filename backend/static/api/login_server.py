@@ -6,8 +6,8 @@ import nacl.encoding
 import nacl.signing
 import time
 
-import static.utils.api_helper as api_helper
-import static.utils.security_helper as security_helper
+import backend.static.utils.api_helper as api_helper
+import backend.static.utils.security_helper as security_helper
 
 
 def add_privatedata(username, password):
@@ -145,7 +145,7 @@ def list_online_users(username, password):
 
     headers = api_helper.create_header(username, password)
 
-    data_object = api_helper.get_data(url, headers)
+    data_object = api_helper.get_data(url, headers=headers)
     users = data_object['users']
     return users
 
@@ -161,8 +161,8 @@ def login(username, password):
 
         # test pub/priv keypair
 
-        isOk = report_user_status(username, password, 'online')
-        if isOk == 'ok':
+        response = report_user_status(username, password, 'online')
+        if response == 'ok':
             return True
         else:
             return False
@@ -174,8 +174,8 @@ def logout(username, password):
     """
     User sign out
     """
-    isOk = report_user_status(username, password, 'offline')
-    if isOk == 'ok':
+    response = report_user_status(username, password, 'offline')
+    if response == 'ok':
         return True
     else:
         return False
@@ -201,7 +201,7 @@ def ping(username, password):
 
     json_bytes = json.dumps(payload).encode('utf-8')
 
-    data_object = api_helper.get_data(url, headers, json_bytes)
+    data_object = api_helper.get_data(url, headers=headers, data=json_bytes)
     return data_object['response']
 
 
@@ -231,7 +231,7 @@ def report_user_status(username, password, status='online'):
 
     json_bytes = json.dumps(payload).encode('utf-8')
 
-    data_object = api_helper.get_data(url, headers, json_bytes)
+    data_object = api_helper.get_data(url, headers=headers, data=json_bytes)
     return data_object['response']
 
 
@@ -246,7 +246,7 @@ def load_new_apikey(username, password):
     url = 'http://cs302.kiwi.land/api/load_new_apikey'
 
     headers = api_helper.create_header(username, password)
-    data_object = api_helper.get_data(url, headers)
+    data_object = api_helper.get_data(url, headers=headers)
 
     return data_object
 
