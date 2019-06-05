@@ -8,8 +8,13 @@ import static.utils.security_helper as security_helper
 def broadcast(username, password, message):
     """
     Transmits a signed broadcast between users
+
+    Returns:
+    data_object - type: object
     """
     url = 'http://192.168.1.63:1025/api/rx_broadcast'
+    # url = 'http://172.23.1.134:8080/api/rx_broadcast'  # Emily
+    # url = 'http://cs302.kiwi.land/api/rx_broadcast'  # Hammond
 
     username = "wyao332"  # FOR TESTING PURPOSES
     password = "wryao64_106379276"  # FOR TESTING PURPOSES
@@ -30,9 +35,9 @@ def broadcast(username, password, message):
     json_bytes = json.dumps(payload).encode('utf-8')
 
     data_object = api_helper.get_data(url, headers=headers, data=json_bytes)
-    json_object = json.loads(data_object)
+    data_object = json.loads(data_object)
 
-    return json_object
+    return data_object
 
 
 def private_message(username, password):

@@ -20,6 +20,9 @@ def create_header(username, password):
 def get_data(url, headers=None, data=None):
     """
     Retrieves data from API endpoint
+
+    Returns:
+    data_object - type: object
     """
     try:
         if headers == None and data == None:
