@@ -5,7 +5,7 @@ import static.utils.api_helper as api_helper
 import static.utils.security_helper as security_helper
 
 
-def broadcast(login_server_record, message, sender_created_at, signature):
+def broadcast(loginserver_record, message, sender_created_at, signature):
     """
     Transmits a signed broadcast between users
     """
@@ -32,7 +32,7 @@ def broadcast(login_server_record, message, sender_created_at, signature):
     return json_object
 
 
-def private_message(login_server_record, target_pubkey, target_username, encrypted_message, sender_created_at, signature):
+def private_message(loginserver_record, target_pubkey, target_username, encrypted_message, sender_created_at, signature):
     """
     Transmits a secret message between users.
     """
@@ -53,14 +53,14 @@ def ping_check(my_time, my_active_usernames, connection_address, connection_loca
     pass
 
 
-def group_message(login_server_record, group_key_hash, group_message, sender_created_at, signature):
+def group_message(loginserver_record, group_key_hash, group_message, sender_created_at, signature):
     """
     Transmits a secret group message between users
     """
     pass
 
 
-def group_invite(login_server_record, group_key_hash, target_pubkey, targer_username, encrypted_group_key, sender_created_at, signature):
+def group_invite(loginserver_record, group_key_hash, target_pubkey, targer_username, encrypted_group_key, sender_created_at, signature):
     """
     Transmits a secret group message between users
     """

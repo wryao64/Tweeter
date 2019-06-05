@@ -128,9 +128,9 @@ def get_privatedata(username, password):
 
     encrypted_data = data_object['privatedata']
     decrypted_data = security_helper.decrypt_data(key, encrypted_data)
-    private_data = json.loads(decrypted_data)
+    privatedata = json.loads(decrypted_data)
 
-    return private_data
+    return privatedata
 
 
 def list_online_users(username, password):

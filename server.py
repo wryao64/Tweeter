@@ -275,19 +275,19 @@ class ApiApp(object):
     @cherrypy.tools.json_in()
     @cherrypy.tools.json_out()
     def rx_broadcast(self):
-        login_server_record = cherrypy.request.json['loginserver_record']
+        loginserver_record = cherrypy.request.json['loginserver_record']
         message = cherrypy.request.json['message']
         sender_created_at = cherrypy.request.json['sender_created_at']
         signature = cherrypy.request.json['signature']
 
         response = client_incoming_request.broadcast(
-            login_server_record, message, sender_created_at, signature)
+            loginserver_record, message, sender_created_at, signature)
 
         return response
 
     @cherrypy.expose
     def rx_privatemessage(self):
-        # client_incoming_request.private_message(login_server_record, target_pubkey, target_username, encrypted_message, sender_created_at, signature)
+        # client_incoming_request.private_message(loginserver_record, target_pubkey, target_username, encrypted_message, sender_created_at, signature)
         pass
 
     @cherrypy.expose
@@ -302,11 +302,11 @@ class ApiApp(object):
 
     @cherrypy.expose
     def rx_groupmessage(self):
-        # client_incoming_request.group_message(login_server_record, group_key_hash, group_message, sender_created_at, signature)
+        # client_incoming_request.group_message(loginserver_record, group_key_hash, group_message, sender_created_at, signature)
         pass
 
     @cherrypy.expose
     def rx_groupinvite(self):
-        # client_incoming_request.group_invite(login_server_record, group_key_hash, target_pubkey, targer_username, encrypted_group_key, sender_created_at, signature)
+        # client_incoming_request.group_invite(loginserver_record, group_key_hash, target_pubkey, targer_username, encrypted_group_key, sender_created_at, signature)
         pass
 
