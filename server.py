@@ -52,9 +52,7 @@ class MainApp(object):
         Page = startHTML + 'Welcome! This is the base website!<br/>'
 
         try:
-            username = cherrypy.session['username']
-
-            Page += 'Hello ' + str(username) + '!<br/>'
+            Page += 'Hello ' + cherrypy.session['username'] + '!<br/>'
             Page += 'You have logged in! <a href="/sign_out">Sign out</a>'
 
             Page += '<form action="/broadcast_message" method="post" enctype="multipart/form-data">'
