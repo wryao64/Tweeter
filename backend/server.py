@@ -50,46 +50,47 @@ class MainApp(object):
     # Pages
     @cherrypy.expose
     def index(self):
-        Page = startHTML + 'Welcome! This is the base website!<br/>'
+        # Page = startHTML + 'Welcome! This is the base website!<br/>'
 
-        try:
-            Page += 'Hello ' + cherrypy.session['username'] + '!<br/>'
-            Page += 'You have logged in! <a href="/sign_out">Sign out</a>'
+        # try:
+        #     Page += 'Hello ' + cherrypy.session['username'] + '!<br/>'
+        #     Page += 'You have logged in! <a href="/sign_out">Sign out</a>'
 
-            Page += """
-            <h3>Broadcast Message</h3>
-            <form action="/broadcast_message" method="post" enctype="multipart/form-data">
-            Message: <input type="message" name="message"/><br/>
-            <input type="submit" value="Send"/></form><br/>
-            <br/>
-            <h3>Private Message</h3>
-            <form action="/private_message" method="post" enctype="multipart/form-data">
-            Message: <input type="message" name="message"/><br/>
-            <input type="submit" value="Send"/></form><br/>
-            <br/>
-            <h3>Broadcasts</h3>
-            """
+        #     Page += """
+        #     <h3>Broadcast Message</h3>
+        #     <form action="/broadcast_message" method="post" enctype="multipart/form-data">
+        #     Message: <input type="message" name="message"/><br/>
+        #     <input type="submit" value="Send"/></form><br/>
+        #     <br/>
+        #     <h3>Private Message</h3>
+        #     <form action="/private_message" method="post" enctype="multipart/form-data">
+        #     Message: <input type="message" name="message"/><br/>
+        #     <input type="submit" value="Send"/></form><br/>
+        #     <br/>
+        #     <h3>Broadcasts</h3>
+        #     """
 
-            broadcasts = broadcast_repository.get_broadcasts()
+        #     broadcasts = broadcast_repository.get_broadcasts()
 
-            if len(broadcasts) == 0:
-                Page += 'There are no broadcasts'
-            else:
-                for broadcast in broadcasts:
-                    Page += str(broadcast) + '<br/><br/>'
+        #     if len(broadcasts) == 0:
+        #         Page += 'There are no broadcasts'
+        #     else:
+        #         for broadcast in broadcasts:
+        #             Page += str(broadcast) + '<br/><br/>'
 
-            private_messages = private_message_repository.get_messages()
+        #     private_messages = private_message_repository.get_messages()
 
-            Page += '<h3>Private Messages</h3>'
-            if len(private_messages) == 0:
-                Page += 'There are no messages'
-            else:
-                for message in private_messages:
-                    Page += str(message) + '<br/><br/>'
-        except KeyError:  # There is no username
-            Page += 'Click here to <a href="login">login</a>.'
-        # return open('../frontend/tweeter/build/index.html')
-        return Page
+        #     Page += '<h3>Private Messages</h3>'
+        #     if len(private_messages) == 0:
+        #         Page += 'There are no messages'
+        #     else:
+        #         for message in private_messages:
+        #             Page += str(message) + '<br/><br/>'
+        # except KeyError:  # There is no username
+        #     Page += 'Click here to <a href="login">login</a>.'
+        # return Page
+        return open('static/build/index.html')
+
 
     @cherrypy.expose
     def broadcast_message(self, message=None):
