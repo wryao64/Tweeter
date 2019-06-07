@@ -54,6 +54,8 @@ def private_message(username, password, message):
     loginserver_record = 'wyao332,69592f14f52422ecf713b21f1615da2fec7d67eb7f0a8c4d3a72121d8e49cb66,1559114951.7035556,d0a5992d76f5f5464ddc0a530d8ea5f8a99b0fde4e0a3d4b91d100b7515188929ef22801420f25cc0b0f51095fa8cd9fbe6d3c93e1a93b7b2857cafdd6159a0e'
     pubkey = '69592f14f52422ecf713b21f1615da2fec7d67eb7f0a8c4d3a72121d8e49cb66'
     ts = '1559114951.7035556'
+    # username = 'admin'
+    # pubkey = '11c8c33b6052ad73a7a29e832e97e31f416dedb7c6731a6f456f83a344488ec0'
 
     keys = security_helper.get_keys(
         loginserver_record + pubkey + username + message + str(ts))  # FOR TESTING PURPOSES
