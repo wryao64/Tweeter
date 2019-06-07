@@ -33,14 +33,16 @@ def get_data(url, headers=None, data=None):
             req = urllib.request.Request(url, headers=headers)
         else:
             req = urllib.request.Request(url, data=data, headers=headers)
-        
-        response = urllib.request.urlopen(req)
+
+        response = urllib.request.urlopen(req, timeout=2)
         data = response.read()
         encoding = response.info().get_content_charset('utf-8')
         data_object = json.loads(data.decode(encoding))
-        
+
         response.close()
     except urllib.error.HTTPError as error:
         data = error.read().decode('utf-8')
         data_object = json.loads(data)
+    except urllib.error.URLError as error:
+        data_object = error.reason
     return data_object

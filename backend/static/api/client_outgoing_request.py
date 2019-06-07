@@ -3,6 +3,7 @@ import time
 
 import static.utils.api_helper as api_helper
 import static.utils.security_helper as security_helper
+import static.api.login_server as login_server
 
 
 def broadcast(username, password, message):
@@ -13,18 +14,18 @@ def broadcast(username, password, message):
     data_object - type: object
     """
     # url = 'http://127.0.0.1:1025/api/rx_broadcast'  # local
-    url = 'http://172.23.159.9:1025/api/rx_broadcast'  # uni
+    # url = 'http://172.23.159.9:1025/api/rx_broadcast'  # uni
     # url = 'http://172.23.1.134:8080/api/rx_broadcast'  # Emily
     # url = 'http://cs302.kiwi.land/api/rx_broadcast'  # Hammond
     # url = 'http://172.23.69.234:80/api/rx_broadcast'  # James
 
-    username = "wyao332"  # FOR TESTING PURPOSES
-    password = "wryao64_106379276"  # FOR TESTING PURPOSES
-    loginserver_record = 'wyao332,69592f14f52422ecf713b21f1615da2fec7d67eb7f0a8c4d3a72121d8e49cb66,1559114951.7035556,d0a5992d76f5f5464ddc0a530d8ea5f8a99b0fde4e0a3d4b91d100b7515188929ef22801420f25cc0b0f51095fa8cd9fbe6d3c93e1a93b7b2857cafdd6159a0e'
-    ts = '1559114951.7035556'
+    loginserver_record = login_server.get_loginserver_record(username, password)
+    ts = time.time()
 
-    keys = security_helper.get_keys(
-        loginserver_record + message + str(ts))  # FOR TESTING PURPOSES
+    prikey = login_server.get_privatekey(username, password)
+    pubkey = security_helper.get_public_key(prikey)
+    message_data = loginserver_record + message + str(ts)
+    signature = security_helper.get_signature(prikey, pubkey, message_data=message_data)
 
     headers = api_helper.create_header(username, password)
 
@@ -32,14 +33,28 @@ def broadcast(username, password, message):
         'loginserver_record': loginserver_record,
         'message': message,
         'sender_created_at': str(ts),
-        'signature': keys['signature'],
+        'signature': signature,
     }
     json_bytes = json.dumps(payload).encode('utf-8')
 
-    data_object = api_helper.get_data(url, headers=headers, data=json_bytes)
-    data_object = json.loads(data_object)
+    # broadcast to everyone that's online
+    try:
+        users = login_server.list_users(username, password)
 
-    return data_object
+        for user in users:
+            connection_address = user['connection_address']
+            url = f'http:{connection_address}/api/rx_broadcast'
+            data_object = api_helper.get_data(url, headers=headers, data=json_bytes)
+
+            try:
+                data_object = json.loads(data_object)
+                print('{}: {}'.format(connection_address, data_object['response']))
+            except json.decoder.JSONDecodeError:
+                print('{}: {}'.format(connection_address, data_object))
+    except TypeError:
+        pass
+
+    return 'ok'
 
 
 def private_message(username, password, message):

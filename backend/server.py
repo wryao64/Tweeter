@@ -132,7 +132,7 @@ class MainApp(object):
         response = client_outgoing_request.broadcast(
             username, password, message)
 
-        if response['response'] == 'ok':
+        if response == 'ok':
             raise cherrypy.HTTPRedirect('/')
         else:
             raise cherrypy.HTTPRedirect('/')
