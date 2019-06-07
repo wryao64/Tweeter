@@ -104,8 +104,29 @@ def ping_check(username, password):
     """
     Checks is another client is active
     """
+    url = 'http://172.23.159.9:1025/api/ping_check'  # uni
+
     username = "wyao332"  # FOR TESTING PURPOSES
     password = "wryao64_106379276"  # FOR TESTING PURPOSES
+    my_time = ''
+    my_active_usernames = []
+    connection_address = ''
+    connection_location = ''
+
+    headers = api_helper.create_header(username, password)
+
+    payload = {
+        'my_time': my_time,
+        'my_active_usernames': my_active_usernames,
+        'connection_address': connection_address,
+        'connection_location': connection_location,
+    }
+    json_bytes = json.dumps(payload).encode('utf-8')
+
+    data_object = api_helper.get_data(url, headers=headers, data=json_bytes)
+    data_object = json.loads(data_object)
+
+    return data_object
 
 
 def group_message(username, password):

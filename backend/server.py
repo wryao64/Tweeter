@@ -68,8 +68,9 @@ class MainApp(object):
             <input type="submit" value="Send"/></form><br/>
         
             <h3>Check Messages</h3>
-            <a href="check_messages">Check</a><br/>
-            
+            <a href="check_messages">Check</a>
+            <h3>Ping Check</h3>
+            <a href="ping_check">Check</a><br/>
 
             <h3>Broadcasts</h3>
             """
@@ -127,6 +128,18 @@ class MainApp(object):
         password = cherrypy.session.get('password')
 
         response = client_outgoing_request.check_messages(username, password)
+
+        if response['response'] == 'ok':
+            raise cherrypy.HTTPRedirect('/')
+        else:
+            raise cherrypy.HTTPRedirect('/')
+
+    @cherrypy.expose
+    def ping_check(self):
+        username = cherrypy.session.get('username')
+        password = cherrypy.session.get('password')
+
+        response = client_outgoing_request.ping_check(username, password)
 
         if response['response'] == 'ok':
             raise cherrypy.HTTPRedirect('/')
@@ -370,8 +383,15 @@ class ApiApp(object):
     @cherrypy.tools.json_in()
     @cherrypy.tools.json_out()
     def ping_check(self):
-        # client_incoming_request.ping_check(my_time, my_active_usernames, connection_address, connection_location)
-        pass
+        my_time = cherrypy.request.json['my_time']
+        my_active_usernames = cherrypy.request.json['my_active_usernames']
+        connection_address = cherrypy.request.json['connection_address']
+        connection_location = cherrypy.request.json['connection_location']
+
+        response = client_incoming_request.ping_check(
+            my_time, my_active_usernames, connection_address, connection_location)
+
+        return response
 
     @cherrypy.expose
     @cherrypy.tools.json_in()

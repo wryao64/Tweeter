@@ -70,7 +70,19 @@ def ping_check(my_time, my_active_usernames, connection_address, connection_loca
     """
     Checks is another client is active
     """
-    pass
+
+    # check?
+
+    data_object = {
+        'response': 'ok'
+    }
+    # data_object = {
+    #     'response': 'error',
+    #     'message': 'Error: ###',
+    # }
+    json_object = json.dumps(data_object)
+
+    return json_object
 
 
 def group_message(loginserver_record, group_key_hash, group_message, sender_created_at, signature):
