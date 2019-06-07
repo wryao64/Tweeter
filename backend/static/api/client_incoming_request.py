@@ -49,8 +49,21 @@ def private_message(loginserver_record, target_pubkey, target_username, encrypte
 def check_messages(since):
     """
     Retrieve already-sent messages from other clients in the network
+
+    Return:
+    json_object - json-formatted string
     """
-    pass
+
+    # retrieve messages from database
+
+    data_object = {
+        'response': 'ok',
+        'broadcasts': [],
+        'private_messages': [],
+    }
+    json_object = json.dumps(data_object)
+    
+    return json_object
 
 
 def ping_check(my_time, my_active_usernames, connection_address, connection_location):

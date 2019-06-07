@@ -50,47 +50,50 @@ class MainApp(object):
     # Pages
     @cherrypy.expose
     def index(self):
-        # Page = startHTML + 'Welcome! This is the base website!<br/>'
+        Page = startHTML + 'Welcome! This is the base website!<br/>'
 
-        # try:
-        #     Page += 'Hello ' + cherrypy.session['username'] + '!<br/>'
-        #     Page += 'You have logged in! <a href="/sign_out">Sign out</a>'
+        try:
+            Page += 'Hello ' + cherrypy.session['username'] + '!<br/>'
+            Page += 'You have logged in! <a href="/sign_out">Sign out</a>'
 
-        #     Page += """
-        #     <h3>Broadcast Message</h3>
-        #     <form action="/broadcast_message" method="post" enctype="multipart/form-data">
-        #     Message: <input type="message" name="message"/><br/>
-        #     <input type="submit" value="Send"/></form><br/>
-        #     <br/>
-        #     <h3>Private Message</h3>
-        #     <form action="/private_message" method="post" enctype="multipart/form-data">
-        #     Message: <input type="message" name="message"/><br/>
-        #     <input type="submit" value="Send"/></form><br/>
-        #     <br/>
-        #     <h3>Broadcasts</h3>
-        #     """
+            Page += """
+            <h3>Broadcast Message</h3>
+            <form action="/broadcast_message" method="post" enctype="multipart/form-data">
+            Message: <input type="message" name="message"/><br/>
+            <input type="submit" value="Send"/></form><br/>
+            
+            <h3>Private Message</h3>
+            <form action="/private_message" method="post" enctype="multipart/form-data">
+            Message: <input type="message" name="message"/><br/>
+            <input type="submit" value="Send"/></form><br/>
+        
+            <h3>Check Messages</h3>
+            <a href="check_messages">Check</a><br/>
+            
 
-        #     broadcasts = broadcast_repository.get_broadcasts()
+            <h3>Broadcasts</h3>
+            """
 
-        #     if len(broadcasts) == 0:
-        #         Page += 'There are no broadcasts'
-        #     else:
-        #         for broadcast in broadcasts:
-        #             Page += str(broadcast) + '<br/><br/>'
+            broadcasts = broadcast_repository.get_broadcasts()
 
-        #     private_messages = private_message_repository.get_messages()
+            if len(broadcasts) == 0:
+                Page += 'There are no broadcasts'
+            else:
+                for broadcast in broadcasts:
+                    Page += str(broadcast) + '<br/><br/>'
 
-        #     Page += '<h3>Private Messages</h3>'
-        #     if len(private_messages) == 0:
-        #         Page += 'There are no messages'
-        #     else:
-        #         for message in private_messages:
-        #             Page += str(message) + '<br/><br/>'
-        # except KeyError:  # There is no username
-        #     Page += 'Click here to <a href="login">login</a>.'
-        # return Page
-        return open('static/build/index.html')
+            private_messages = private_message_repository.get_messages()
 
+            Page += '<h3>Private Messages</h3>'
+            if len(private_messages) == 0:
+                Page += 'There are no messages'
+            else:
+                for message in private_messages:
+                    Page += str(message) + '<br/><br/>'
+        except KeyError:  # There is no username
+            Page += 'Click here to <a href="login">login</a>.'
+        return Page
+        # return open('static/build/index.html')
 
     @cherrypy.expose
     def broadcast_message(self, message=None):
@@ -112,6 +115,18 @@ class MainApp(object):
 
         response = client_outgoing_request.private_message(
             username, password)
+
+        if response['response'] == 'ok':
+            raise cherrypy.HTTPRedirect('/')
+        else:
+            raise cherrypy.HTTPRedirect('/')
+
+    @cherrypy.expose
+    def check_messages(self):
+        username = cherrypy.session.get('username')
+        password = cherrypy.session.get('password')
+
+        response = client_outgoing_request.check_messages(username, password)
 
         if response['response'] == 'ok':
             raise cherrypy.HTTPRedirect('/')
@@ -345,11 +360,11 @@ class ApiApp(object):
         return response
 
     @cherrypy.expose
-    @cherrypy.tools.json_in()
     @cherrypy.tools.json_out()
-    def checkmessages(self):
-        # client_incoming_request.check_messages(since)
-        pass
+    def checkmessages(self, since):
+        response = client_incoming_request.check_messages(since)
+
+        return response
 
     @cherrypy.expose
     @cherrypy.tools.json_in()

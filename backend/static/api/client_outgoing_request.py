@@ -12,9 +12,11 @@ def broadcast(username, password, message):
     Returns:
     data_object - type: object
     """
-    url = 'http://192.168.1.63:1025/api/rx_broadcast'
+    # url = 'http://127.0.0.1:1025/api/rx_broadcast'  # local
+    url = 'http://172.23.159.9:1025/api/rx_broadcast'  # uni
     # url = 'http://172.23.1.134:8080/api/rx_broadcast'  # Emily
     # url = 'http://cs302.kiwi.land/api/rx_broadcast'  # Hammond
+    # url = 'http://172.23.69.234:80/api/rx_broadcast'  # James
 
     username = "wyao332"  # FOR TESTING PURPOSES
     password = "wryao64_106379276"  # FOR TESTING PURPOSES
@@ -44,7 +46,7 @@ def private_message(username, password):
     """
     Transmits a secret message between users.
     """
-    url = 'http://192.168.1.63:1025/api/rx_privatemessage'
+    url = 'http://127.0.0.1:1025/api/rx_privatemessage'
     # url = 'http://cs302.kiwi.land/api/rx_privatemessage'  # Hammond
 
     username = "wyao332"  # FOR TESTING PURPOSES
@@ -78,9 +80,24 @@ def private_message(username, password):
 def check_messages(username, password):
     """
     Retrieve already-sent messages from other clients in the network
+    
+    Return:
+    data_object - Python object
     """
+    # url = 'http://127.0.0.1:1025/api/checkmessages'
+    url = 'http://172.23.159.9:1025/api/checkmessages'
+
     username = "wyao332"  # FOR TESTING PURPOSES
     password = "wryao64_106379276"  # FOR TESTING PURPOSES
+    ts = '1559114951.7035556'
+
+    url += f'?since={ts}'
+
+    headers = api_helper.create_header(username, password)
+    data_object = api_helper.get_data(url, headers=headers)
+    data_object = json.loads(data_object)
+
+    return data_object
 
 
 def ping_check(username, password):
