@@ -47,6 +47,7 @@ def generate_secret_box(key):
 
     return box
 
+
 def get_keys(message_data=None, use_pubkey=False):
     """
     For testing: gets strings of pubkey, signature
@@ -86,3 +87,53 @@ def get_keys(message_data=None, use_pubkey=False):
     }
 
     return keys
+
+
+def get_public_key(prikey):
+    """
+    Retrieves user's public key
+
+    Input:
+        prikeys - 
+    Return:
+        pubkey_hex_str - string
+    """
+    signing_key = nacl.signing.SigningKey(
+        prikey, encoder=nacl.encoding.HexEncoder)
+
+    pubkey = signing_key.verify_key
+    pubkey_hex = pubkey.encode(encoder=nacl.encoding.HexEncoder)
+    pubkey_hex_str = pubkey_hex.decode('utf-8')
+    
+    return pubkey_hex_str
+
+
+def get_signature(prikey, pubkey):
+    """
+    Processes signature from user's public key
+
+    Input:
+        prikey -
+        pubkey - 
+        message_data - 
+    Return:
+        signature - string
+    """
+    # if message_data == None:
+    #     message = pubkey_hex_str
+    # elif message_data != None and use_pubkey == True:
+    #     message = pubkey_hex_str + message_data
+    # else:
+    #     message = message_data
+    # message = pubkey + message_data  # pubkey + username
+    message = pubkey
+
+    message_bytes = bytes(message, encoding='utf-8')
+
+    # Sign message with signing/private key
+    signing_key = nacl.signing.SigningKey(
+        prikey, encoder=nacl.encoding.HexEncoder)
+    signed = signing_key.sign(message_bytes, encoder=nacl.encoding.HexEncoder)
+    signature_hex_str = signed.signature.decode('utf-8')
+
+    return signature_hex_str

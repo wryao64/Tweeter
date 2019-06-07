@@ -21,7 +21,7 @@ def add_privatedata(username, password):
     key = 'strongkey'  # FOR TESTING PURPOSE: change to take user input
 
     data = {
-        'prikeys': [],
+        'prikeys': ['cd7f971fc826eeb354c5ade4293b5e83a93c74c1aa624a2c28e6a14b97ae3d0d'],
         'blocked_pubkeys': [],
         'blocked_usernames': [],
         'blocked_words': [],
@@ -59,12 +59,13 @@ def add_privatedata(username, password):
 def add_pubkey(username, password):
     """
     Associates a public key with the user's account
+
+    Return:
+    data_object - 
     """
     url = "http://cs302.kiwi.land/api/add_pubkey"
 
-    username = "wyao332"  # FOR TESTING PURPOSES
-    password = "wryao64_106379276"  # FOR TESTING PURPOSES
-    keys = security_helper.get_keys(username, True)  # FOR TESTING PURPOSES
+    keys = security_helper.get_public_key
 
     headers = api_helper.create_header(username, password)
 
@@ -73,10 +74,12 @@ def add_pubkey(username, password):
         "username": username,
         "signature": keys['signature'],
     }
-
     json_bytes = json.dumps(payload).encode('utf-8')
 
     data_object = api_helper.get_data(url, headers=headers, data=json_bytes)
+
+    # response = ok, return keys
+
     return data_object
 
 
@@ -116,11 +119,12 @@ def get_loginserver_record(username, password):
 def get_privatedata(username, password):
     """
     Loads the saved symmetrically encrypted private data of the user
+
+    Return:
+    privatedata - decrypted data as Python object
     """
     url = 'http://cs302.kiwi.land/api/get_privatedata'
 
-    username = "wyao332"  # FOR TESTING PURPOSES
-    password = "wryao64_106379276"  # FOR TESTING PURPOSES
     key = 'strongkey'  # FOR TESTING PURPOSE: change to take user input
 
     headers = api_helper.create_header(username, password)
@@ -184,25 +188,34 @@ def logout(username, password):
 def ping(username, password):
     """
     Checks if the login server is online and authenticates login
+
+    Return:
+    string - 'ok' if authenticated, an error message if there is an error
     """
     url = 'http://cs302.kiwi.land/api/ping'
 
-    username = "wyao332"  # FOR TESTING PURPOSES
-    password = "wryao64_106379276"  # FOR TESTING PURPOSES
-    keys = security_helper.get_keys()  # FOR TESTING PURPOSES
+    prikey = get_privatedata(username, password)['prikeys'][0]  # assuming there is always a private key
+    pubkey = security_helper.get_public_key(prikey)
+    signature = security_helper.get_signature(prikey, pubkey)
 
     headers = api_helper.create_header(username, password)
 
     payload = {
-        "pubkey": keys['pubkey'],
-        "username": username,
-        "signature": keys['signature'],
+        "pubkey": pubkey,
+        "signature": signature,
     }
-
     json_bytes = json.dumps(payload).encode('utf-8')
 
     data_object = api_helper.get_data(url, headers=headers, data=json_bytes)
-    return data_object['response']
+    r_response = data_object['response']
+    r_signature = data_object['signature']
+
+    if r_response == 'ok' and r_signature == 'ok':
+        return 'ok'
+    elif r_response == 'ok' and r_signature != 'ok':
+        return data_object['signature']
+    elif r_response == 'error':
+        return data_object['message']
 
 
 def report_user_status(username, password, status='online'):
@@ -249,7 +262,6 @@ def load_new_apikey(username, password):
     data_object = api_helper.get_data(url, headers=headers)
 
     return data_object
-
 
 
 def server_pubkey():
