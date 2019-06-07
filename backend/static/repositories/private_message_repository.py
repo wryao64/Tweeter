@@ -29,7 +29,7 @@ def get_messages():
         return r.fetchall()
 
 
-def post_broadcast(loginserver_record, target_pubkey, target_username, encrypted_message, sender_created_at, signature):
+def post_message(loginserver_record, target_pubkey, target_username, encrypted_message, sender_created_at, signature):
     set_up_database()
 
     with sqlite3.connect(DB_STRING) as c:

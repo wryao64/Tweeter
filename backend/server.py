@@ -5,6 +5,7 @@ import static.api.client_outgoing_request as client_outgoing_request
 import static.api.client_incoming_request as client_incoming_request
 import static.repositories.broadcast_repository as broadcast_repository
 import static.repositories.private_message_repository as private_message_repository
+import static.repositories.group_message_repository as group_message_repository
 
 
 startHTML = """<html>
@@ -60,12 +61,17 @@ class MainApp(object):
             <h3>Broadcast Message</h3>
             <form action="/broadcast_message" method="post" enctype="multipart/form-data">
             Message: <input type="message" name="message"/><br/>
-            <input type="submit" value="Send"/></form><br/>
+            <input type="submit" value="Send"/></form>
             
             <h3>Private Message</h3>
             <form action="/private_message" method="post" enctype="multipart/form-data">
             Message: <input type="message" name="message"/><br/>
-            <input type="submit" value="Send"/></form><br/>
+            <input type="submit" value="Send"/></form>
+
+            <h3>Group Message</h3>
+            <form action="/group_message" method="post" enctype="multipart/form-data">
+            Message: <input type="message" name="message"/><br/>
+            <input type="submit" value="Send"/></form>
         
             <h3>Check Messages</h3>
             <a href="check_messages">Check</a>
@@ -91,6 +97,15 @@ class MainApp(object):
             else:
                 for message in private_messages:
                     Page += str(message) + '<br/><br/>'
+
+            group_messages = group_message_repository.get_messages()
+
+            Page += '<h3>Group Messages</h3>'
+            if len(group_messages) == 0:
+                Page += 'There are no messages'
+            else:
+                for message in group_messages:
+                    Page += str(message) + '<br/><br/>'
         except KeyError:  # There is no username
             Page += 'Click here to <a href="login">login</a>.'
         return Page
@@ -115,7 +130,20 @@ class MainApp(object):
         password = cherrypy.session.get('password')
 
         response = client_outgoing_request.private_message(
-            username, password)
+            username, password, message)
+
+        if response['response'] == 'ok':
+            raise cherrypy.HTTPRedirect('/')
+        else:
+            raise cherrypy.HTTPRedirect('/')
+
+    @cherrypy.expose
+    def group_message(self, message=None):
+        username = cherrypy.session.get('username')
+        password = cherrypy.session.get('password')
+
+        response = client_outgoing_request.group_message(
+            username, password, message)
 
         if response['response'] == 'ok':
             raise cherrypy.HTTPRedirect('/')
@@ -384,12 +412,14 @@ class ApiApp(object):
     @cherrypy.tools.json_out()
     def ping_check(self):
         my_time = cherrypy.request.json['my_time']
-        my_active_usernames = cherrypy.request.json['my_active_usernames']
+        # my_active_usernames = cherrypy.request.json['my_active_usernames']
         connection_address = cherrypy.request.json['connection_address']
         connection_location = cherrypy.request.json['connection_location']
 
+        # response = client_incoming_request.ping_check(
+        #     my_time, my_active_usernames, connection_address, connection_location)
         response = client_incoming_request.ping_check(
-            my_time, my_active_usernames, connection_address, connection_location)
+            my_time, connection_address, connection_location)
 
         return response
 
@@ -397,12 +427,20 @@ class ApiApp(object):
     @cherrypy.tools.json_in()
     @cherrypy.tools.json_out()
     def rx_groupmessage(self):
-        # client_incoming_request.group_message(loginserver_record, group_key_hash, group_message, sender_created_at, signature)
-        pass
+        loginserver_record = cherrypy.request.json['loginserver_record']
+        groupkey_hash = cherrypy.request.json['groupkey_hash']
+        group_message = cherrypy.request.json['group_message']
+        sender_created_at = cherrypy.request.json['sender_created_at']
+        signature = cherrypy.request.json['signature']
+
+        response = client_incoming_request.group_message(
+            loginserver_record, groupkey_hash, group_message, sender_created_at, signature)
+
+        return response
 
     @cherrypy.expose
     @cherrypy.tools.json_in()
     @cherrypy.tools.json_out()
     def rx_groupinvite(self):
-        # client_incoming_request.group_invite(loginserver_record, group_key_hash, target_pubkey, targer_username, encrypted_group_key, sender_created_at, signature)
+        # client_incoming_request.group_invite(loginserver_record, groupkey_hash, target_pubkey, targer_username, encrypted_group_key, sender_created_at, signature)
         pass
