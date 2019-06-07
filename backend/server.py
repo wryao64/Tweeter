@@ -413,7 +413,13 @@ class MainApp(object):
 
         data = login_server.load_new_apikey(username, password)
 
-        Page += data['api_key']
+        try:
+            Page += f"""
+            API Key: {data['api_key']}<br>
+            Generated at: {data['api_key_generated_at']}
+            """
+        except KeyError:
+            Page += data['message']
 
         return Page
 

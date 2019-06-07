@@ -282,15 +282,15 @@ def load_new_apikey(username, password):
     Returns a new API key for authentication for the rest of the session
     Note: implemented for future use
     """
-    username = "wyao332"  # FOR TESTING PURPOSES
-    password = "wryao64_106379276"  # FOR TESTING PURPOSES
-
     url = 'http://cs302.kiwi.land/api/load_new_apikey'
 
     headers = api_helper.create_header(username, password)
     data_object = api_helper.get_data(url, headers=headers)
 
-    return data_object
+    if data_object['response'] == 'ok':
+        return data_object
+    else:
+        return {'message': data_object['message']}
 
 
 def server_pubkey():
