@@ -10,7 +10,7 @@ import static.utils.api_helper as api_helper
 import static.utils.security_helper as security_helper
 
 
-def add_privatedata(username, password):
+def add_privatedata(username, password, data):
     """
     Saves symmetrically encrypted private data for a user
     """
@@ -18,15 +18,15 @@ def add_privatedata(username, password):
 
     key = 'strongkey'  # FOR TESTING PURPOSE: change to take user input
 
-    data = {
-        'prikeys': ['cd7f971fc826eeb354c5ade4293b5e83a93c74c1aa624a2c28e6a14b97ae3d0d'],
-        'blocked_pubkeys': [],
-        'blocked_usernames': [],
-        'blocked_words': [],
-        'blocked_message_signatures': [],
-        'favourite_message_signatures': [],
-        'friends_usernames': [],
-    }
+    # data = {
+    #     'prikeys': ['cd7f971fc826eeb354c5ade4293b5e83a93c74c1aa624a2c28e6a14b97ae3d0d'],
+    #     'blocked_pubkeys': [],
+    #     'blocked_usernames': [],
+    #     'blocked_words': [],
+    #     'blocked_message_signatures': [],
+    #     'favourite_message_signatures': [],
+    #     'friends_usernames': [],
+    # }
     json_data = json.dumps(data)
 
     encrypted_data = security_helper.encrypt_data(key, json_data)
@@ -68,7 +68,14 @@ def add_pubkey(username, password):
     """
     url = "http://cs302.kiwi.land/api/add_pubkey"
 
-    prikey = get_privatekey(username, password)
+    # generate new private key
+    prikey = security_helper.generate_private_key()
+
+    # upload private key to privatedata
+    private_data = get_privatedata(username, password)
+    (private_data['prikeys'])[0] = prikey
+    add_privatedata(username, password, private_data)
+
     pubkey = security_helper.get_public_key(prikey)
     signature = security_helper.get_signature(prikey, pubkey, username=username)
 

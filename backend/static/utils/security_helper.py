@@ -34,6 +34,13 @@ def encrypt_data(key, data):
     return encrypted_str
 
 
+def generate_private_key():
+    hex_key = nacl.signing.SigningKey.generate().encode(
+        encoder=nacl.encoding.HexEncoder)
+    hex_key_str = hex_key.decode('utf-8')
+    return hex_key_str
+
+
 def generate_secret_box(key):
     """
     Generate secret box for Secret Key Encryption
@@ -104,7 +111,7 @@ def get_public_key(prikey):
     pubkey = signing_key.verify_key
     pubkey_hex = pubkey.encode(encoder=nacl.encoding.HexEncoder)
     pubkey_hex_str = pubkey_hex.decode('utf-8')
-    
+
     return pubkey_hex_str
 
 
