@@ -16,8 +16,6 @@ def add_privatedata(username, password):
     """
     url = 'http://cs302.kiwi.land/api/add_privatedata'
 
-    username = "wyao332"  # FOR TESTING PURPOSES
-    password = "wryao64_106379276"  # FOR TESTING PURPOSES
     key = 'strongkey'  # FOR TESTING PURPOSE: change to take user input
 
     data = {
@@ -29,17 +27,18 @@ def add_privatedata(username, password):
         'favourite_message_signatures': [],
         'friends_usernames': [],
     }
-
     json_data = json.dumps(data)
 
     encrypted_data = security_helper.encrypt_data(key, json_data)
 
     loginserver_record = get_loginserver_record(
-        username, password)['loginserver_record']
+        username, password)
     ts = time.time()
 
-    keys = security_helper.get_keys(
-        encrypted_data + loginserver_record + str(ts))  # FOR TESTING PURPOSES
+    prikey = get_privatekey(username, password)
+    pubkey = security_helper.get_public_key(prikey)
+    message_data = encrypted_data + loginserver_record + str(ts)
+    signature = security_helper.get_signature(prikey, pubkey, message_data=message_data)
 
     headers = api_helper.create_header(username, password)
 
@@ -47,13 +46,16 @@ def add_privatedata(username, password):
         'privatedata': encrypted_data,
         'loginserver_record': loginserver_record,
         'client_saved_at': str(ts),
-        'signature': keys['signature'],
+        'signature': signature,
     }
     json_bytes = json.dumps(payload).encode('utf-8')
 
     data_object = api_helper.get_data(url, headers=headers, data=json_bytes)
 
-    return data_object
+    if data_object['response'] == 'ok':
+        return data_object['server_received_at']
+    else:
+        return data_object['message']
 
 
 def add_pubkey(username, password):
@@ -61,26 +63,30 @@ def add_pubkey(username, password):
     Associates a public key with the user's account
 
     Return:
-    data_object - 
+        loginserver_record - string
+        Or if error, string with error message
     """
     url = "http://cs302.kiwi.land/api/add_pubkey"
 
-    keys = security_helper.get_public_key
+    prikey = get_privatekey(username, password)
+    pubkey = security_helper.get_public_key(prikey)
+    signature = security_helper.get_signature(prikey, pubkey, username=username)
 
     headers = api_helper.create_header(username, password)
 
     payload = {
-        "pubkey": keys['pubkey'],
-        "username": username,
-        "signature": keys['signature'],
+        'pubkey': pubkey,
+        'username': username,
+        'signature': signature,
     }
     json_bytes = json.dumps(payload).encode('utf-8')
 
     data_object = api_helper.get_data(url, headers=headers, data=json_bytes)
 
-    # response = ok, return keys
-
-    return data_object
+    if data_object['response'] == 'ok':
+        return data_object['loginserver_record']
+    else:
+        return data_object['message']
 
 
 def check_pubkey(username, password):
@@ -89,16 +95,18 @@ def check_pubkey(username, password):
     """
     url = "http://cs302.kiwi.land/api/check_pubkey"
 
-    username = "wyao332"  # FOR TESTING PURPOSES
-    password = "wryao64_106379276"  # FOR TESTING PURPOSES
-    keys = security_helper.get_keys()  # FOR TESTING PURPOSES
+    prikey = get_privatekey(username, password)
+    pubkey = security_helper.get_public_key(prikey)
+    url += "?pubkey=" + pubkey
 
     headers = api_helper.create_header(username, password)
 
-    url += "?pubkey=" + keys['pubkey']
-
     data_object = api_helper.get_data(url, headers=headers)
-    return data_object
+
+    if data_object['response'] == 'ok':
+        return data_object
+    else:
+        return {'message': data_object['message']}
 
 
 def get_loginserver_record(username, password):
@@ -107,13 +115,14 @@ def get_loginserver_record(username, password):
     """
     url = 'http://cs302.kiwi.land/api/get_loginserver_record'
 
-    username = "wyao332"  # FOR TESTING PURPOSES
-    password = "wryao64_106379276"  # FOR TESTING PURPOSES
-
     headers = api_helper.create_header(username, password)
 
     data_object = api_helper.get_data(url, headers=headers)
-    return data_object
+
+    if data_object['response'] == 'ok':
+        return data_object['loginserver_record']
+    else:
+        return data_object['message']
 
 
 def get_privatedata(username, password):
@@ -121,7 +130,8 @@ def get_privatedata(username, password):
     Loads the saved symmetrically encrypted private data of the user
 
     Return:
-    privatedata - decrypted data as Python object
+        privatedata - decrypted data as Python object
+        Or if error, Python object with error message
     """
     url = 'http://cs302.kiwi.land/api/get_privatedata'
 
@@ -131,27 +141,45 @@ def get_privatedata(username, password):
 
     data_object = api_helper.get_data(url, headers=headers)
 
-    encrypted_data = data_object['privatedata']
-    decrypted_data = security_helper.decrypt_data(key, encrypted_data)
-    privatedata = json.loads(decrypted_data)
+    if data_object['response'] == 'ok':
+        encrypted_data = data_object['privatedata']
+        decrypted_data = security_helper.decrypt_data(key, encrypted_data)
+        privatedata = json.loads(decrypted_data)
 
-    return privatedata
+        return privatedata
+    else:
+        return {'message': data_object['message']}
 
 
-def list_online_users(username, password):
+def get_privatekey(username, password):
+    """
+    FOR INTERNAL USE ONLY
+    """
+    try:
+        prikey = get_privatedata(username, password)['prikeys'][0]
+    except KeyError:  # for testing purposes
+        prikey = '69592f14f52422ecf713b21f1615da2fec7d67eb7f0a8c4d3a72121d8e49cb66'
+    return prikey
+
+
+def list_users(username, password):
     """
     Lists the connection details for all active users within the last five minutes
+    
+    Return:
+        users - Python object
     """
     url = 'http://cs302.kiwi.land/api/list_users'
-
-    username = "wyao332"  # FOR TESTING PURPOSES
-    password = "wryao64_106379276"  # FOR TESTING PURPOSES
 
     headers = api_helper.create_header(username, password)
 
     data_object = api_helper.get_data(url, headers=headers)
-    users = data_object['users']
-    return users
+
+    if data_object['response'] == 'ok':
+        users = data_object['users']
+        return users
+    else:
+        return {'message': data_object['message']}
 
 
 def login(username, password):
@@ -192,7 +220,7 @@ def ping(username, password):
     url = 'http://cs302.kiwi.land/api/ping'
 
     # assuming there is always a private key
-    prikey = get_privatedata(username, password)['prikeys'][0]
+    prikey = get_privatekey(username, password)
     pubkey = security_helper.get_public_key(prikey)
     signature = security_helper.get_signature(prikey, pubkey)
 
@@ -231,7 +259,7 @@ def report_user_status(username, password, status='online'):
     connection_location = '2'
 
     # assuming there is always a private key
-    prikey = get_privatedata(username, password)['prikeys'][0]
+    prikey = get_privatekey(username, password)
     pubkey = security_helper.get_public_key(prikey)
 
     headers = api_helper.create_header(username, password)
@@ -284,6 +312,5 @@ def list_apis():
 
     data_object = api_helper.get_data(url)
     json_data = json.dumps(data_object, indent=4)
-    print(json_data)
 
     return data_object

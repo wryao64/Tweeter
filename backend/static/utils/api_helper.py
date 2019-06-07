@@ -24,6 +24,8 @@ def get_data(url, headers=None, data=None):
     Returns:
     data_object - type: object
     """
+    data_object = None
+
     try:
         if headers == None and data == None:
             req = urllib.request.Request(url)
@@ -38,7 +40,7 @@ def get_data(url, headers=None, data=None):
         data_object = json.loads(data.decode(encoding))
         
         response.close()
-
-        return data_object
     except urllib.error.HTTPError as error:
-        print(error.read())
+        data = error.read().decode('utf-8')
+        data_object = json.loads(data)
+    return data_object

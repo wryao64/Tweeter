@@ -18,7 +18,7 @@ startHTML = """<html>
                     <a href="/">home</a><br/>
 
                     <h1>LS endpoints</h1>
-                    <a href="list_online_users">list online users</a><br/>
+                    <a href="list_users">list online users</a><br/>
                     <a href="server_pubkey">server pubkey</a><br/>
                     <a href="add_pubkey">add pubkey</a><br/>
                     <a href="check_pubkey">check pubkey</a><br/>
@@ -258,24 +258,27 @@ class MainApp(object):
             raise cherrypy.HTTPRedirect('/')
 
     @cherrypy.expose
-    def list_online_users(self):
+    def list_users(self):
         username = cherrypy.session.get('username')
         password = cherrypy.session.get('password')
 
         Page = startHTML
 
-        users = login_server.list_online_users(username, password)
+        users = login_server.list_users(username, password)
 
-        for user in users:
-            Page += f"""
-            Incoming pub key: {user['incoming_pubkey']}<br/>
-            Username: {user['username']}<br/>
-            Connection Location: {user['connection_location']}<br/>
-            Connection Address: {user['connection_address']}<br/>
-            Status: {user['status']}<br/>
-            Connection Updated At: {user['connection_updated_at']}<br/>
-            <br/>
-            """
+        try:
+            for user in users:
+                Page += f"""
+                Incoming pub key: {user['incoming_pubkey']}<br/>
+                Username: {user['username']}<br/>
+                Connection Location: {user['connection_location']}<br/>
+                Connection Address: {user['connection_address']}<br/>
+                Status: {user['status']}<br/>
+                Connection Updated At: {user['connection_updated_at']}<br/>
+                <br/>
+                """
+        except TypeError:
+            Page += users['message']
 
         return Page
 
@@ -296,6 +299,8 @@ class MainApp(object):
 
         data = login_server.add_privatedata(username, password)
 
+        Page += f'Server received at: {data}'
+
         return Page
 
     @cherrypy.expose
@@ -308,7 +313,7 @@ class MainApp(object):
         data = login_server.add_pubkey(username, password)
 
         Page += f"""
-        Login Server Record: {data['loginserver_record']}<br/>           
+        Login Server Record: {data}<br/>           
         """
 
         return Page
@@ -322,13 +327,16 @@ class MainApp(object):
 
         data = login_server.check_pubkey(username, password)
 
-        Page += f"""
-        Login Server Record: {data['loginserver_record']}<br/>
-        Username: {data['username']}<br/>
-        Connection Address: {data['connection_address']}<br/>
-        Connection Location: {data['connection_location']}<br/>
-        Connection Updated At: {data['connection_updated_at']}<br/>            
-        """
+        try:
+            Page += f"""
+            Login Server Record: {data['loginserver_record']}<br/>
+            Username: {data['username']}<br/>
+            Connection Address: {data['connection_address']}<br/>
+            Connection Location: {data['connection_location']}<br/>
+            Connection Updated At: {data['connection_updated_at']}<br/>            
+            """
+        except KeyError:
+            Page += data['message']
 
         return Page
 
@@ -342,7 +350,7 @@ class MainApp(object):
         data = login_server.get_loginserver_record(username, password)
 
         Page += f"""
-        Login Server Record: {data['loginserver_record']}<br/>           
+        Login Server Record: {data}<br/>           
         """
 
         return Page
@@ -356,15 +364,18 @@ class MainApp(object):
 
         data = login_server.get_privatedata(username, password)
 
-        Page += f"""
-        Private Keys: {data['prikeys']}<br/>
-        Blocked Public Keys: {data['blocked_pubkeys']}<br/>
-        Blocked Usernames: {data['blocked_usernames']}<br/>
-        Blocked Words: {data['blocked_words']}<br/>
-        Blocked Message Signatures: {data['blocked_message_signatures']}<br/>
-        Favourite Message Signatures: {data['favourite_message_signatures']}<br/>
-        Friends' Usernames: {data['friends_usernames']}<br/>
-        """
+        try:
+            Page += f"""
+            Private Keys: {data['prikeys']}<br/>
+            Blocked Public Keys: {data['blocked_pubkeys']}<br/>
+            Blocked Usernames: {data['blocked_usernames']}<br/>
+            Blocked Words: {data['blocked_words']}<br/>
+            Blocked Message Signatures: {data['blocked_message_signatures']}<br/>
+            Favourite Message Signatures: {data['favourite_message_signatures']}<br/>
+            Friends' Usernames: {data['friends_usernames']}<br/>
+            """
+        except KeyError:
+            Page += data['message']
 
         return Page
 

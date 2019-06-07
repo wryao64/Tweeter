@@ -108,14 +108,14 @@ def get_public_key(prikey):
     return pubkey_hex_str
 
 
-def get_signature(prikey, pubkey):
+def get_signature(prikey, pubkey, username=None, message_data=None):
     """
     Processes signature from user's public key
 
     Input:
         prikey -
         pubkey - 
-        message_data - 
+        username - 
     Return:
         signature - string
     """
@@ -126,7 +126,12 @@ def get_signature(prikey, pubkey):
     # else:
     #     message = message_data
     # message = pubkey + message_data  # pubkey + username
-    message = pubkey
+    if username != None:
+        message = pubkey + username
+    elif message_data != None:
+        message = message_data
+    else:
+        message = pubkey
 
     message_bytes = bytes(message, encoding='utf-8')
 
