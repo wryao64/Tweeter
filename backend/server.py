@@ -242,7 +242,7 @@ class MainApp(object):
 
             if isLoggedOut == True:
                 cherrypy.lib.sessions.expire()
-            raise cherrypy.HTTPRedirect('/')
+        raise cherrypy.HTTPRedirect('/')
 
     # Unsorted
     @cherrypy.expose
