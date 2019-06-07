@@ -42,4 +42,3 @@ def get_data(url, headers=None, data=None):
         return data_object
     except urllib.error.HTTPError as error:
         print(error.read())
-        exit()

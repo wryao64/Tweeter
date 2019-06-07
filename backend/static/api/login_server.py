@@ -161,12 +161,9 @@ def login(username, password):
     isAuthenticated = ping(username, password)
 
     if isAuthenticated == 'ok':
-        # check public/private keypair
-
-        # test pub/priv keypair
-
         response = report_user_status(username, password, 'online')
-        if response == 'ok':
+
+        if response['response'] == 'ok':
             return True
         else:
             return False
@@ -179,7 +176,7 @@ def logout(username, password):
     User sign out
     """
     response = report_user_status(username, password, 'offline')
-    if response == 'ok':
+    if response['response'] == 'ok':
         return True
     else:
         return False
@@ -194,7 +191,8 @@ def ping(username, password):
     """
     url = 'http://cs302.kiwi.land/api/ping'
 
-    prikey = get_privatedata(username, password)['prikeys'][0]  # assuming there is always a private key
+    # assuming there is always a private key
+    prikey = get_privatedata(username, password)['prikeys'][0]
     pubkey = security_helper.get_public_key(prikey)
     signature = security_helper.get_signature(prikey, pubkey)
 
@@ -221,31 +219,34 @@ def ping(username, password):
 def report_user_status(username, password, status='online'):
     """
     Informs the login server about connection information for the user
+
+    Return:
+        data_object - Python object
     """
+    url = 'http://cs302.kiwi.land/api/report'
+
     host = cherrypy.config.get('server.socket_host')
     port = cherrypy.config.get('server.socket_port')
-    connection_address = f'{host}:{port}'
+    connection_address = '{}:{}'.format(host, port)
     connection_location = '2'
 
-    username = "wyao332"  # FOR TESTING PURPOSES
-    password = "wryao64_106379276"  # FOR TESTING PURPOSES
-    keys = security_helper.get_keys()  # FOR TESTING PURPOSES
-
-    url = 'http://cs302.kiwi.land/api/report'
+    # assuming there is always a private key
+    prikey = get_privatedata(username, password)['prikeys'][0]
+    pubkey = security_helper.get_public_key(prikey)
 
     headers = api_helper.create_header(username, password)
 
     payload = {
         'connection_address': connection_address,
         'connection_location': connection_location,
-        'incoming_pubkey': keys['pubkey'],
+        'incoming_pubkey': pubkey,
         'status': status,
     }
 
     json_bytes = json.dumps(payload).encode('utf-8')
 
     data_object = api_helper.get_data(url, headers=headers, data=json_bytes)
-    return data_object['response']
+    return data_object
 
 
 def load_new_apikey(username, password):

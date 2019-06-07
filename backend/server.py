@@ -58,6 +58,14 @@ class MainApp(object):
             Page += 'You have logged in! <a href="/sign_out">Sign out</a>'
 
             Page += """
+            <h3>Change Status</h3>
+            <form action="/change_status" method="post" enctype="multipart/form-data">
+            <input type="radio" name="status" value="online">Online<br/>
+            <input type="radio" name="status" value="busy">Busy<br/>
+            <input type="radio" name="status" value="away">Away<br/>
+            <input type="radio" name="status" value="offline">Offline<br/>
+            <input type="submit" value="Change"/></form>
+
             <h3>Broadcast Message</h3>
             <form action="/broadcast_message" method="post" enctype="multipart/form-data">
             Message: <input type="message" name="message"/><br/>
@@ -237,6 +245,18 @@ class MainApp(object):
             raise cherrypy.HTTPRedirect('/')
 
     # Unsorted
+    @cherrypy.expose
+    def change_status(self, status='online'):
+        username = cherrypy.session.get('username')
+        password = cherrypy.session.get('password')
+
+        response = login_server.report_user_status(username, password, status)
+
+        if response['response'] == 'ok':
+            raise cherrypy.HTTPRedirect('/')
+        else:
+            raise cherrypy.HTTPRedirect('/')
+
     @cherrypy.expose
     def list_online_users(self):
         username = cherrypy.session.get('username')
