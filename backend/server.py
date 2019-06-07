@@ -72,6 +72,11 @@ class MainApp(object):
             <form action="/group_message" method="post" enctype="multipart/form-data">
             Message: <input type="message" name="message"/><br/>
             <input type="submit" value="Send"/></form>
+
+            <h3>Group Invite</h3>
+            <form action="/group_invite" method="post" enctype="multipart/form-data">
+            Username: <input type="username" name="username"/><br/>
+            <input type="submit" value="Send"/></form>
         
             <h3>Check Messages</h3>
             <a href="check_messages">Check</a>
@@ -144,6 +149,19 @@ class MainApp(object):
 
         response = client_outgoing_request.group_message(
             username, password, message)
+
+        if response['response'] == 'ok':
+            raise cherrypy.HTTPRedirect('/')
+        else:
+            raise cherrypy.HTTPRedirect('/')
+
+    @cherrypy.expose
+    def group_invite(self, username=None):
+        username = cherrypy.session.get('username')
+        password = cherrypy.session.get('password')
+
+        response = client_outgoing_request.group_invite(
+            username, password, username)
 
         if response['response'] == 'ok':
             raise cherrypy.HTTPRedirect('/')
@@ -442,5 +460,15 @@ class ApiApp(object):
     @cherrypy.tools.json_in()
     @cherrypy.tools.json_out()
     def rx_groupinvite(self):
-        # client_incoming_request.group_invite(loginserver_record, groupkey_hash, target_pubkey, targer_username, encrypted_group_key, sender_created_at, signature)
-        pass
+        loginserver_record = cherrypy.request.json['loginserver_record']
+        groupkey_hash = cherrypy.request.json['groupkey_hash']
+        target_pubkey = cherrypy.request.json['target_pubkey']
+        target_username = cherrypy.request.json['target_username']
+        encrypted_groupkey = cherrypy.request.json['encrypted_groupkey']
+        sender_created_at = cherrypy.request.json['sender_created_at']
+        signature = cherrypy.request.json['signature']
+
+        response = client_incoming_request.group_invite(
+            loginserver_record, groupkey_hash, target_pubkey, target_username, encrypted_groupkey, sender_created_at, signature)
+        
+        return response

@@ -112,8 +112,20 @@ def group_message(loginserver_record, groupkey_hash, group_message, sender_creat
     return json_object
 
 
-def group_invite(loginserver_record, groupkey_hash, target_pubkey, targer_username, encrypted_group_key, sender_created_at, signature):
+def group_invite(loginserver_record, groupkey_hash, target_pubkey, targer_username, encrypted_groupkey, sender_created_at, signature):
     """
     Transmits a secret group message between users
     """
-    pass
+
+    # store?
+
+    data_object = {
+        'response': 'ok'
+    }
+    # data_object = {
+    #     'response': 'error',
+    #     'message': 'Error: ###',
+    # }
+    json_object = json.dumps(data_object)
+
+    return json_object
