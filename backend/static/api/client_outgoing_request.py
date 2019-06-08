@@ -1,6 +1,7 @@
 import json
 import time
 import socket
+import cherrypy
 
 import static.utils.api_helper as api_helper
 import static.utils.security_helper as security_helper
@@ -33,19 +34,18 @@ def broadcast(username, password, message):
     json_bytes = json.dumps(payload).encode('utf-8')
 
     # broadcast to everyone that's online
-    # users = login_server.list_users(username, password)
+    users = login_server.list_users(username, password)
     # users = [{'connection_address':'210.54.33.182:80'}]
-    users = [{'connection_address':'127.0.0.1:1025'}]
+    # users = [{'connection_address':'127.0.0.1:1025'}]
 
     for user in users:
         connection_address = user['connection_address']
 
         # ping client to check if they are online
-        # response = ping_check(username, password, connection_address)
-        # print(str(response))
-        # if response['response'] != 'ok':
-        #     print('{}: {}'.format(connection_address, response['message']))
-        #     # continue
+        response = ping_check(username, password, connection_address)
+        if response['response'] != 'ok':
+            print('{}: PingError {}'.format(connection_address, response['message']))
+            continue
 
         url = 'http://{}/api/rx_broadcast'.format(connection_address)
         
@@ -124,12 +124,13 @@ def ping_check(username, password, target_connection_address):
     Checks if another client is active
     """
     url = 'http://{}/api/ping_check'.format(target_connection_address)
-    print(url + '===============================================')
 
     my_time = time.time()
     # my_active_usernames = []
-    connection_address = ''
-    connection_location = ''
+    host = cherrypy.config.get('server.socket_host')
+    port = cherrypy.config.get('server.socket_port')
+    connection_address = '{}:{}'.format(host, port)
+    connection_location = '2'
 
     headers = api_helper.create_header(username, password)
 
@@ -142,18 +143,8 @@ def ping_check(username, password, target_connection_address):
     json_bytes = json.dumps(payload).encode('utf-8')
 
     data_object = api_helper.get_data(url, headers=headers, data=json_bytes)
-    print('got data ======================================================')
-    try:
-        data_object = json.loads(data_object)
-        print('json loaded========================================')
-        return data_object['response']
-    except json.decoder.JSONDecodeError:
-        print('decoder error===========================================')
-        return {
-            'response': 'error',
-            'message': data_object['message']
-        }
-
+    return data_object
+        
 
 def group_message(username, password, message):
     """
