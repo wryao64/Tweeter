@@ -120,14 +120,16 @@ def check_messages(username, password):
     return data_object
 
 
-def ping_check(username, password, target_connection_address):
+def ping_check(username, password, target_connection_address, my_active_usernames=None):
     """
     Checks if another client is active
+
+    Return:
+        data_object - object
     """
     url = 'http://{}/api/ping_check'.format(target_connection_address)
 
     my_time = time.time()
-    # my_active_usernames = []
     host = cherrypy.config.get('server.socket_host')
     port = cherrypy.config.get('server.socket_port')
     connection_address = '{}:{}'.format(host, port)
@@ -135,12 +137,19 @@ def ping_check(username, password, target_connection_address):
 
     headers = api_helper.create_header(username, password)
 
-    payload = {
-        'my_time': my_time,
-        # 'my_active_usernames': my_active_usernames,
-        'connection_address': connection_address,
-        'connection_location': connection_location,
-    }
+    if my_active_usernames != None:
+        payload = {
+            'my_time': my_time,
+            'my_active_usernames': my_active_usernames,
+            'connection_address': connection_address,
+            'connection_location': connection_location,
+        }
+    else:
+        payload = {
+            'my_time': my_time,
+            'connection_address': connection_address,
+            'connection_location': connection_location,
+        }
     json_bytes = json.dumps(payload).encode('utf-8')
 
     data_object = api_helper.get_data(url, headers=headers, data=json_bytes)

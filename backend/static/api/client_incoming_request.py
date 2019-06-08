@@ -66,21 +66,24 @@ def check_messages(since):
     return data_object
 
 
-# def ping_check(my_time, my_active_usernames, connection_address, connection_location):
-def ping_check(my_time, connection_address, connection_location):
+def ping_check(my_time, connection_address, connection_location, my_active_usernames=None):
     """
     Checks if another client is active
+
+    Return:
+        data_object - object
     """
+    if my_active_usernames != None:
+        # get active users on this server
 
-    # check?
-
-    data_object = {
-        'response': 'ok'
-    }
-    # data_object = {
-    #     'response': 'error',
-    #     'message': 'Error: ###',
-    # }
+        data_object = {
+            'response': 'ok',
+            'my_active_usernames': [],
+        }
+    else:
+        data_object = {
+            'response': 'ok'
+        }
 
     return data_object
 

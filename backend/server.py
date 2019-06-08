@@ -193,7 +193,7 @@ class MainApp(object):
         username = cherrypy.session.get('username')
         password = cherrypy.session.get('password')
 
-        response = client_outgoing_request.ping_check(username, password)
+        response = client_outgoing_request.ping_check(username, password, '127.0.0.1:1025')
 
         if response['response'] == 'ok':
             raise cherrypy.HTTPRedirect('/')
