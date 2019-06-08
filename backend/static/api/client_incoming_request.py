@@ -43,9 +43,8 @@ def private_message(loginserver_record, target_pubkey, target_username, encrypte
     #     'response': 'error',
     #     'message': 'Error: ###',
     # }
-    json_object = json.dumps(data_object)
 
-    return json_object
+    return data_object
 
 
 def check_messages(since):
@@ -63,15 +62,14 @@ def check_messages(since):
         'broadcasts': [],
         'private_messages': [],
     }
-    json_object = json.dumps(data_object)
 
-    return json_object
+    return data_object
 
 
 # def ping_check(my_time, my_active_usernames, connection_address, connection_location):
 def ping_check(my_time, connection_address, connection_location):
     """
-    Checks is another client is active
+    Checks if another client is active
     """
 
     # check?
@@ -83,9 +81,8 @@ def ping_check(my_time, connection_address, connection_location):
     #     'response': 'error',
     #     'message': 'Error: ###',
     # }
-    json_object = json.dumps(data_object)
 
-    return json_object
+    return data_object
 
 
 def group_message(loginserver_record, groupkey_hash, group_message, sender_created_at, signature):
@@ -105,9 +102,8 @@ def group_message(loginserver_record, groupkey_hash, group_message, sender_creat
     #     'response': 'error',
     #     'message': 'Error: ###',
     # }
-    json_object = json.dumps(data_object)
 
-    return json_object
+    return data_object
 
 
 def group_invite(loginserver_record, groupkey_hash, target_pubkey, targer_username, encrypted_groupkey, sender_created_at, signature):
@@ -124,6 +120,5 @@ def group_invite(loginserver_record, groupkey_hash, target_pubkey, targer_userna
     #     'response': 'error',
     #     'message': 'Error: ###',
     # }
-    json_object = json.dumps(data_object)
 
-    return json_object
+    return data_object
