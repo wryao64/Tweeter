@@ -15,7 +15,7 @@ def broadcast(username, password, message):
     Returns:
         'ok' - string
     """
-    loginserver_record = login_server.get_loginserver_record(username, password)
+    loginserver_record = login_server.get_loginserver_record(username, password)['loginserver_record']
     ts = time.time()
 
     prikey = login_server.get_privatekey(username, password)
@@ -34,9 +34,9 @@ def broadcast(username, password, message):
     json_bytes = json.dumps(payload).encode('utf-8')
 
     # broadcast to everyone that's online
-    users = login_server.list_users(username, password)
+    # users = login_server.list_users(username, password)
     # users = [{'connection_address':'210.54.33.182:80'}]
-    # users = [{'connection_address':'127.0.0.1:1025'}]
+    users = [{'connection_address':'127.0.0.1:1025'}]
 
     for user in users:
         connection_address = user['connection_address']
@@ -51,7 +51,6 @@ def broadcast(username, password, message):
         
         data_object = api_helper.get_data(url, headers=headers, data=json_bytes)
         
-        # add error checking for TypeError? (if others implement broadcast incorrectly)
         if data_object['response'] == 'ok':
             cherrypy.log('{}: {}'.format(connection_address, data_object['response']))
         else:

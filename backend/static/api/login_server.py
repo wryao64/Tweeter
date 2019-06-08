@@ -92,18 +92,14 @@ def add_pubkey(username, password):
     return data_object
 
 
-def check_pubkey(username, password):
+def check_pubkey(username, password, pubkey):
     """
     Loads the loginserver_record for a given public key
 
     Return:
         data_object - object
     """
-    url = "http://cs302.kiwi.land/api/check_pubkey"
-
-    prikey = get_privatekey(username, password)
-    pubkey = security_helper.get_public_key(prikey)
-    url += "?pubkey=" + pubkey
+    url = "http://cs302.kiwi.land/api/check_pubkey?pubkey={}".format(pubkey)
 
     headers = api_helper.create_header(username, password)
 

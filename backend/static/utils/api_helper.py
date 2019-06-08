@@ -51,5 +51,10 @@ def get_data(url, headers=None, data=None):
             'response': 'error',
             'message': 'URLError: {}'.format(error.reason)
         }
+    except socket.timeout as error:
+        data_object = {
+            'response': 'error',
+            'message': 'Socket timeout: {}'.format(error)
+        }
     
     return data_object

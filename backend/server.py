@@ -6,6 +6,7 @@ import static.api.client_incoming_request as client_incoming_request
 import static.repositories.broadcast_repository as broadcast_repository
 import static.repositories.private_message_repository as private_message_repository
 import static.repositories.group_message_repository as group_message_repository
+import static.repositories.user_repository as user_repository
 
 
 startHTML = """<html>
@@ -223,6 +224,7 @@ class MainApp(object):
         if response['response'] == 'ok':
             cherrypy.session['username'] = username
             cherrypy.session['password'] = password
+            user_repository.post_user(username, password)
             raise cherrypy.HTTPRedirect('/')
 
             # tell user they are online
@@ -243,6 +245,7 @@ class MainApp(object):
 
             if response['response'] == 'ok':
                 cherrypy.lib.sessions.expire()
+                user_repository.delete_table()
         raise cherrypy.HTTPRedirect('/')
 
     # Unsorted
@@ -343,7 +346,8 @@ class MainApp(object):
 
         Page = startHTML
 
-        data = login_server.check_pubkey(username, password)
+        pubkey = '127e8c1ec5dd75335d59591fcb6701f9b446bddc98764c984a7ec97540d1f1a8'
+        data = login_server.check_pubkey(username, password, pubkey)
 
         try:
             Page += """

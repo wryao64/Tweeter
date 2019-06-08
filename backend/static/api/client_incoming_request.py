@@ -1,27 +1,44 @@
 import json
+import cherrypy
 
 import static.repositories.broadcast_repository as broadcast_repository
 import static.repositories.private_message_repository as private_message_repository
 import static.repositories.group_message_repository as group_message_repository
+import static.repositories.user_repository as user_repository
+import static.api.login_server as login_server
 
 
 def broadcast(loginserver_record, message, sender_created_at, signature):
     """
     Transmits a signed broadcast between users
     """
-    # authenticate
+    # details of receiver
+    details = user_repository.get_user()
+    username = details[0]
+    password = details[1]
 
-    # send to database
-    broadcast_repository.post_broadcast(
-        loginserver_record, message, sender_created_at, signature)
+    record = loginserver_record.split(',')
+    target_pubkey = record[1]
 
-    data_object = {
-        'response': 'ok'
-    }
-    # data_object = {
-    #     'response': 'error',
-    #     'message': 'Error: ###',
-    # }
+    response = login_server.check_pubkey(username, password, target_pubkey)
+    if response['response'] == 'ok':
+        if response['loginserver_record'] == loginserver_record:
+            # store in database
+            broadcast_repository.post_broadcast(
+                loginserver_record, message, sender_created_at, signature)
+
+            data_object = {
+                'response': 'ok'
+            }
+        else:
+            cherrypy.log('Login Server Record does not match')
+            data_object = {
+                'response': 'error',
+                'message': 'Error: Login Server Record does not match',
+            }
+    else:
+        cherrypy.log('Pubkey error')
+        data_object = response
 
     return data_object
 
