@@ -2,7 +2,6 @@ import json
 import time
 import socket
 import cherrypy
-import logging
 
 import static.utils.api_helper as api_helper
 import static.utils.security_helper as security_helper

@@ -4,7 +4,6 @@ This program uses the CherryPy web server (from www.cherrypy.org).
 """
 
 import os
-# import logging
 
 import cherrypy
 
