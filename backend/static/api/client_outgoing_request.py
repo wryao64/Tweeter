@@ -45,7 +45,7 @@ def broadcast(username, password, message):
         # ping client to check if they are online
         response = ping_check(username, password, connection_address)
         if response['response'] != 'ok':
-            logging.warning('{}: Ping error: {}'.format(connection_address, response['message']))
+            cherrypy.log('{}: Ping error: {}'.format(connection_address, response['message']))
             continue
 
         url = 'http://{}/api/rx_broadcast'.format(connection_address)
@@ -54,9 +54,9 @@ def broadcast(username, password, message):
         
         # add error checking for TypeError? (if others implement broadcast incorrectly)
         if data_object['response'] == 'ok':
-            logging.info('{}: {}'.format(connection_address, data_object['response']))
+            cherrypy.log('{}: {}'.format(connection_address, data_object['response']))
         else:
-            logging.warning('{}: {}'.format(connection_address, data_object['message']))
+            cherrypy.log('{}: {}'.format(connection_address, data_object['message']))
 
     return 'ok'
 
