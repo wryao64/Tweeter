@@ -193,7 +193,8 @@ class MainApp(object):
         username = cherrypy.session.get('username')
         password = cherrypy.session.get('password')
 
-        response = client_outgoing_request.ping_check(username, password, '127.0.0.1:1025')
+        response = client_outgoing_request.ping_check(
+            username, password, '127.0.0.1:1025')
 
         if response['response'] == 'ok':
             raise cherrypy.HTTPRedirect('/')
@@ -217,9 +218,9 @@ class MainApp(object):
     @cherrypy.expose
     def sign_in(self, username=None, password=None):
         """Check their name and password and send them either to the main page, or back to the main login screen."""
-        isLoggedIn = login_server.login(username, password)
+        response = login_server.login(username, password)
 
-        if isLoggedIn == True:
+        if response['response'] == 'ok':
             cherrypy.session['username'] = username
             cherrypy.session['password'] = password
             raise cherrypy.HTTPRedirect('/')
@@ -238,9 +239,9 @@ class MainApp(object):
         if username is None or password is None:
             pass
         else:
-            isLoggedOut = login_server.logout(username, password)
+            response = login_server.logout(username, password)
 
-            if isLoggedOut == True:
+            if response['response'] == 'ok':
                 cherrypy.lib.sessions.expire()
         raise cherrypy.HTTPRedirect('/')
 
@@ -264,21 +265,23 @@ class MainApp(object):
 
         Page = startHTML
 
-        users = login_server.list_users(username, password)
+        data = login_server.list_users(username, password)
 
         try:
+            users = data['users']
+
             for user in users:
-                Page += f"""
-                Incoming pub key: {user['incoming_pubkey']}<br/>
-                Username: {user['username']}<br/>
-                Connection Location: {user['connection_location']}<br/>
-                Connection Address: {user['connection_address']}<br/>
-                Status: {user['status']}<br/>
-                Connection Updated At: {user['connection_updated_at']}<br/>
+                Page += """
+                Incoming pub key: {}<br/>
+                Username: {}<br/>
+                Connection Location: {}<br/>
+                Connection Address: {}<br/>
+                Status: {}<br/>
+                Connection Updated At: {}<br/>
                 <br/>
-                """
-        except TypeError:
-            Page += users['message']
+                """.format(user['incoming_pubkey'], user['username'], user['connection_location'], user['connection_address'], user['status'], user['connection_updated_at'])
+        except KeyError:
+            Page += data['message']
 
         return Page
 
@@ -286,7 +289,7 @@ class MainApp(object):
     def server_pubkey(self):
         Page = startHTML
 
-        Page += login_server.server_pubkey()
+        Page += login_server.server_pubkey()['pubkey']
 
         return Page
 
@@ -297,9 +300,22 @@ class MainApp(object):
 
         Page = startHTML
 
-        data = login_server.add_privatedata(username, password)
+        data = {
+            'prikeys': ['cd7f971fc826eeb354c5ade4293b5e83a93c74c1aa624a2c28e6a14b97ae3d0d'],
+            'blocked_pubkeys': [],
+            'blocked_usernames': [],
+            'blocked_words': [],
+            'blocked_message_signatures': [],
+            'favourite_message_signatures': [],
+            'friends_usernames': [],
+        }
+        response = login_server.add_privatedata(username, password, data)
 
-        Page += f'Server received at: {data}'
+        try:
+            Page += 'Server received at: {}'.format(
+                response['server_received_at'])
+        except KeyError:
+            Page += 'Server received at: {}'.format(response['message'])
 
         return Page
 
@@ -312,9 +328,11 @@ class MainApp(object):
 
         data = login_server.add_pubkey(username, password)
 
-        Page += f"""
-        Login Server Record: {data}<br/>           
-        """
+        try:
+            Page += 'Login Server Record: {}'.format(
+                data['loginserver_record'])
+        except KeyError:
+            Page += 'Login Server Record: {}'.format(data['message'])
 
         return Page
 
@@ -328,13 +346,13 @@ class MainApp(object):
         data = login_server.check_pubkey(username, password)
 
         try:
-            Page += f"""
-            Login Server Record: {data['loginserver_record']}<br/>
-            Username: {data['username']}<br/>
-            Connection Address: {data['connection_address']}<br/>
-            Connection Location: {data['connection_location']}<br/>
-            Connection Updated At: {data['connection_updated_at']}<br/>            
-            """
+            Page += """
+            Login Server Record: {}<br/>
+            Username: {}<br/>
+            Connection Address: {}<br/>
+            Connection Location: {}<br/>
+            Connection Updated At: {}<br/>            
+            """.format(data['loginserver_record'], data['username'], data['connection_address'], data['connection_location'], data['connection_updated_at'])
         except KeyError:
             Page += data['message']
 
@@ -349,9 +367,11 @@ class MainApp(object):
 
         data = login_server.get_loginserver_record(username, password)
 
-        Page += f"""
-        Login Server Record: {data}<br/>           
-        """
+        try:
+            Page += 'Login Server Record: {}'.format(
+                data['loginserver_record'])
+        except KeyError:
+            Page += 'Login Server Record: {}'.format(data['message'])
 
         return Page
 
@@ -365,15 +385,15 @@ class MainApp(object):
         data = login_server.get_privatedata(username, password)
 
         try:
-            Page += f"""
-            Private Keys: {data['prikeys']}<br/>
-            Blocked Public Keys: {data['blocked_pubkeys']}<br/>
-            Blocked Usernames: {data['blocked_usernames']}<br/>
-            Blocked Words: {data['blocked_words']}<br/>
-            Blocked Message Signatures: {data['blocked_message_signatures']}<br/>
-            Favourite Message Signatures: {data['favourite_message_signatures']}<br/>
-            Friends' Usernames: {data['friends_usernames']}<br/>
-            """
+            Page += """
+            Private Keys: {}<br/>
+            Blocked Public Keys: {}<br/>
+            Blocked Usernames: {}<br/>
+            Blocked Words: {}<br/>
+            Blocked Message Signatures: {}<br/>
+            Favourite Message Signatures: {}<br/>
+            Friends' Usernames: {}<br/>
+            """.format(data['prikeys'], data['blocked_pubkeys'], data['blocked_usernames'], data['blocked_words'], data['blocked_message_signatures'], data['favourite_message_signatures'], data['friends_usernames'])
         except KeyError:
             Page += data['message']
 
@@ -414,10 +434,10 @@ class MainApp(object):
         data = login_server.load_new_apikey(username, password)
 
         try:
-            Page += f"""
-            API Key: {data['api_key']}<br>
-            Generated at: {data['api_key_generated_at']}
-            """
+            Page += """
+            API Key: {}<br>
+            Generated at: {}
+            """.format(data['api_key'], data['api_key_generated_at'])
         except KeyError:
             Page += data['message']
 
@@ -507,5 +527,5 @@ class ApiApp(object):
 
         response = client_incoming_request.group_invite(
             loginserver_record, groupkey_hash, target_pubkey, target_username, encrypted_groupkey, sender_created_at, signature)
-        
+
         return response
