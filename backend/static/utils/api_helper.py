@@ -56,5 +56,10 @@ def get_data(url, headers=None, data=None):
             'response': 'error',
             'message': 'Socket timeout: {}'.format(error)
         }
+    except UnicodeError as error:
+        data_object = {
+            'response': 'error',
+            'message': 'UnicodeError: {}'.format(error)
+        }
     
     return data_object

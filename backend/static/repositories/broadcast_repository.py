@@ -18,13 +18,19 @@ def set_up_database():
                 signature)""")
 
 
-def get_broadcasts():
+def get_broadcasts(since=None):
     set_up_database()
 
     with sqlite3.connect(DB_STRING) as c:
-        r = c.execute("""SELECT loginserver_record, message, sender_created_at, signature
-        FROM BROADCASTS""")
-        return r.fetchall()
+        if since == None:
+            r = c.execute("""SELECT loginserver_record, message, sender_created_at, signature
+            FROM BROADCASTS""")
+            return r.fetchall()
+        else:
+            r = c.execute("""SELECT loginserver_record, message, sender_created_at, signature
+            FROM BROADCASTS
+            WHERE sender_created_at > ?""", (since,))
+            return r.fetchall()
 
 
 def post_broadcast(loginserver_record, message, sender_created_at, signature):

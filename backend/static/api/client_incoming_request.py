@@ -73,11 +73,36 @@ def check_messages(since):
     """
 
     # retrieve messages from database
+    r_broadcasts = broadcast_repository.get_broadcasts(since)
+    r_private_messages = private_message_repository.get_messages(since)
+
+    broadcasts = []
+    private_messages = []
+    # convert to objects
+    for b in r_broadcasts:
+        broadcast = {
+            'loginserver_record': b[0],
+            'message': b[1],
+            'sender_created_at': b[2],
+            'signature': b[3],
+        }
+        broadcasts.append(broadcast)
+    
+    for p in r_private_messages:
+        private_message = {
+            'loginserver_record': p[0],
+            'target_pubkey': p[1],
+            'target_username': p[2],
+            'encrypted_message': p[3],
+            'sender_created_at': p[4],
+            'signature': p[5],
+        }
+        private_messages.append(private_message)
 
     data_object = {
         'response': 'ok',
-        'broadcasts': [],
-        'private_messages': [],
+        'broadcasts': broadcasts,
+        'private_messages': private_messages,
     }
 
     return data_object

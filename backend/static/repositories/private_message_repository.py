@@ -20,13 +20,19 @@ def set_up_database():
                 signature)""")
 
 
-def get_messages():
+def get_messages(since=None):
     set_up_database()
 
     with sqlite3.connect(DB_STRING) as c:
-        r = c.execute("""SELECT loginserver_record, target_pubkey, target_username, encrypted_message, sender_created_at, signature
-        FROM PRIVATE_MESSAGES""")
-        return r.fetchall()
+        if since == None:
+            r = c.execute("""SELECT loginserver_record, target_pubkey, target_username, encrypted_message, sender_created_at, signature
+            FROM PRIVATE_MESSAGES""")
+            return r.fetchall()
+        else:
+            r = c.execute("""SELECT loginserver_record, target_pubkey, target_username, encrypted_message, sender_created_at, signature
+            FROM PRIVATE_MESSAGES
+            WHERE sender_created_at > ?""", (since,))
+            return r.fetchall()
 
 
 def post_message(loginserver_record, target_pubkey, target_username, encrypted_message, sender_created_at, signature):

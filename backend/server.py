@@ -1,4 +1,5 @@
 import cherrypy
+import time
 
 import static.api.login_server as login_server
 import static.api.client_outgoing_request as client_outgoing_request
@@ -225,6 +226,8 @@ class MainApp(object):
             cherrypy.session['username'] = username
             cherrypy.session['password'] = password
             user_repository.post_user(username, password)
+            ts = time.time()
+            user_repository.post_login_time(username, ts)
             raise cherrypy.HTTPRedirect('/')
 
             # tell user they are online

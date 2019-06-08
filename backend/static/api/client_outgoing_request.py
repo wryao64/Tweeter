@@ -6,6 +6,9 @@ import cherrypy
 import static.utils.api_helper as api_helper
 import static.utils.security_helper as security_helper
 import static.api.login_server as login_server
+import static.repositories.broadcast_repository as broadcast_repository
+import static.repositories.private_message_repository as private_message_repository
+import static.repositories.user_repository as user_repository
 
 
 def broadcast(username, password, message):
@@ -15,13 +18,15 @@ def broadcast(username, password, message):
     Returns:
         'ok' - string
     """
-    loginserver_record = login_server.get_loginserver_record(username, password)['loginserver_record']
+    loginserver_record = login_server.get_loginserver_record(username, password)[
+        'loginserver_record']
     ts = time.time()
 
     prikey = login_server.get_privatekey(username, password)
     pubkey = security_helper.get_public_key(prikey)
     message_data = loginserver_record + message + str(ts)
-    signature = security_helper.get_signature(prikey, pubkey, message_data=message_data)
+    signature = security_helper.get_signature(
+        prikey, pubkey, message_data=message_data)
 
     headers = api_helper.create_header(username, password)
 
@@ -34,9 +39,9 @@ def broadcast(username, password, message):
     json_bytes = json.dumps(payload).encode('utf-8')
 
     # broadcast to everyone that's online
-    # users = login_server.list_users(username, password)
+    # users = login_server.list_users(username, password)['users]
     # users = [{'connection_address':'210.54.33.182:80'}]
-    users = [{'connection_address':'127.0.0.1:1025'}]
+    users = [{'connection_address': '127.0.0.1:1025'}]
 
     for user in users:
         connection_address = user['connection_address']
@@ -44,17 +49,21 @@ def broadcast(username, password, message):
         # ping client to check if they are online
         response = ping_check(username, password, connection_address)
         if response['response'] != 'ok':
-            cherrypy.log('{}: Ping error: {}'.format(connection_address, response['message']))
+            cherrypy.log('{}: Ping error: {}'.format(
+                connection_address, response['message']))
             continue
 
         url = 'http://{}/api/rx_broadcast'.format(connection_address)
-        
-        data_object = api_helper.get_data(url, headers=headers, data=json_bytes)
-        
+
+        data_object = api_helper.get_data(
+            url, headers=headers, data=json_bytes)
+
         if data_object['response'] == 'ok':
-            cherrypy.log('{}: {}'.format(connection_address, data_object['response']))
+            cherrypy.log('{}: {}'.format(
+                connection_address, data_object['response']))
         else:
-            cherrypy.log('{}: {}'.format(connection_address, data_object['message']))
+            cherrypy.log('{}: {}'.format(
+                connection_address, data_object['message']))
 
     return 'ok'
 
@@ -102,18 +111,47 @@ def check_messages(username, password):
     Return:
     data_object - Python object
     """
-    # url = 'http://127.0.0.1:1025/api/checkmessages'
-    url = 'http://172.23.159.9:1025/api/checkmessages'
-
-    username = "wyao332"  # FOR TESTING PURPOSES
-    password = "wryao64_106379276"  # FOR TESTING PURPOSES
-    ts = '1559114951.7035556'
-
-    url += f'?since={ts}'
-
     headers = api_helper.create_header(username, password)
-    data_object = api_helper.get_data(url, headers=headers)
-    data_object = json.loads(data_object)
+
+    # get time user was last online
+    login_times = user_repository.get_login_times(username)
+    last_online = login_times[-2][0]
+
+    # broadcast to everyone that's online
+    users = login_server.list_users(username, password)['users']
+    # users = [{'connection_address': '127.0.0.1:1025'}]
+
+    for user in users:
+        connection_address = user['connection_address']
+
+        # ping client to check if they are online
+        response = ping_check(username, password, connection_address)
+        if response['response'] != 'ok':
+            cherrypy.log('{}: Ping error: {}'.format(
+                connection_address, response['message']))
+            continue
+
+        url = 'http://{}/api/checkmessages?since={}'.format(connection_address, last_online)
+
+        data_object = api_helper.get_data(
+            url, headers=headers)
+
+        if data_object['response'] == 'ok':
+            broadcasts = data_object['broadcasts']
+            private_messages = data_object['private_messages']
+
+            # post new messages to database
+            for b in broadcasts:
+                broadcast_repository.post_broadcast(b['loginserver_record'], b['message'], b['sender_created_at'], b['signature'])
+
+            for p in private_messages:
+                private_message_repository.post_message(p['loginserver_record'], p['target_pubkey'], p['target_username'], p['encrypted_message'], p['sender_created_at'], p['signature'])
+
+            cherrypy.log('{}: {}'.format(
+                connection_address, data_object['response'])) 
+        else:
+            cherrypy.log('{}: {}'.format(
+                connection_address, data_object['message']))
 
     return data_object
 
@@ -152,7 +190,7 @@ def ping_check(username, password, target_connection_address, my_active_username
 
     data_object = api_helper.get_data(url, headers=headers, data=json_bytes)
     return data_object
-        
+
 
 def group_message(username, password, message):
     """
