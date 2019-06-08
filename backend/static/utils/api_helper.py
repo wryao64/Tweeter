@@ -1,6 +1,7 @@
 import urllib.request
 import json
 import base64
+import socket
 
 
 def create_header(username, password):
@@ -34,15 +35,31 @@ def get_data(url, headers=None, data=None):
         else:
             req = urllib.request.Request(url, data=data, headers=headers)
 
-        response = urllib.request.urlopen(req, timeout=2)
+        response = urllib.request.urlopen(req, timeout=3)
         data = response.read()
         encoding = response.info().get_content_charset('utf-8')
         data_object = json.loads(data.decode(encoding))
 
         response.close()
     except urllib.error.HTTPError as error:
-        data = error.read().decode('utf-8')
-        data_object = json.loads(data)
+        data_object = {
+            'response': 'error',
+            'message': 'HTTPError: {}'.format(error.reason)
+        }
     except urllib.error.URLError as error:
-        data_object = error.reason
+        data_object = {
+            'response': 'error',
+            'message': 'URLError: {}'.format(error.reason)
+        }
+    except socket.error as error:
+        data_object = {
+            'response': 'error',
+            'message': 'socket.error: {}'.format(error)
+        }
+    except socket.timeout as error:
+        data_object = {
+            'response': 'error',
+            'message': 'socket.timeout: {}'.format(error.reason)
+        }
+    
     return data_object

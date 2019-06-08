@@ -12,7 +12,6 @@ def broadcast(loginserver_record, message, sender_created_at, signature):
     # authenticate
 
     # send to database
-    print("Message: " + message)
     broadcast_repository.post_broadcast(
         loginserver_record, message, sender_created_at, signature)
 
@@ -23,9 +22,8 @@ def broadcast(loginserver_record, message, sender_created_at, signature):
     #     'response': 'error',
     #     'message': 'Error: ###',
     # }
-    json_object = json.dumps(data_object)
 
-    return json_object
+    return data_object
 
 
 def private_message(loginserver_record, target_pubkey, target_username, encrypted_message, sender_created_at, signature):

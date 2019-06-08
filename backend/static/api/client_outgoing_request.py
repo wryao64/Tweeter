@@ -1,5 +1,6 @@
 import json
 import time
+import socket
 
 import static.utils.api_helper as api_helper
 import static.utils.security_helper as security_helper
@@ -11,14 +12,8 @@ def broadcast(username, password, message):
     Transmits a signed broadcast between users
 
     Returns:
-    data_object - type: object
+        'ok' - string
     """
-    # url = 'http://127.0.0.1:1025/api/rx_broadcast'  # local
-    # url = 'http://172.23.159.9:1025/api/rx_broadcast'  # uni
-    # url = 'http://172.23.1.134:8080/api/rx_broadcast'  # Emily
-    # url = 'http://cs302.kiwi.land/api/rx_broadcast'  # Hammond
-    # url = 'http://172.23.69.234:80/api/rx_broadcast'  # James
-
     loginserver_record = login_server.get_loginserver_record(username, password)
     ts = time.time()
 
@@ -38,21 +33,29 @@ def broadcast(username, password, message):
     json_bytes = json.dumps(payload).encode('utf-8')
 
     # broadcast to everyone that's online
-    try:
-        users = login_server.list_users(username, password)
+    # users = login_server.list_users(username, password)
+    # users = [{'connection_address':'210.54.33.182:80'}]
+    users = [{'connection_address':'127.0.0.1:1025'}]
 
-        for user in users:
-            connection_address = user['connection_address']
-            url = f'http:{connection_address}/api/rx_broadcast'
-            data_object = api_helper.get_data(url, headers=headers, data=json_bytes)
+    for user in users:
+        connection_address = user['connection_address']
 
-            try:
-                data_object = json.loads(data_object)
-                print('{}: {}'.format(connection_address, data_object['response']))
-            except json.decoder.JSONDecodeError:
-                print('{}: {}'.format(connection_address, data_object))
-    except TypeError:
-        pass
+        # ping client to check if they are online
+        # response = ping_check(username, password, connection_address)
+        # print(str(response))
+        # if response['response'] != 'ok':
+        #     print('{}: {}'.format(connection_address, response['message']))
+        #     # continue
+
+        url = 'http://{}/api/rx_broadcast'.format(connection_address)
+        
+        data_object = api_helper.get_data(url, headers=headers, data=json_bytes)
+        
+        # add error checking for TypeError? (if others implement broadcast incorrectly)
+        if data_object['response'] == 'ok':
+            print('{}: {}'.format(connection_address, data_object['response']))
+        else:
+            print('{}: {}'.format(connection_address, data_object['message']))
 
     return 'ok'
 
@@ -116,16 +119,15 @@ def check_messages(username, password):
     return data_object
 
 
-def ping_check(username, password):
+def ping_check(username, password, target_connection_address):
     """
-    Checks is another client is active
+    Checks if another client is active
     """
-    url = 'http://172.23.159.9:1025/api/ping_check'  # uni
+    url = 'http://{}/api/ping_check'.format(target_connection_address)
+    print(url + '===============================================')
 
-    username = "wyao332"  # FOR TESTING PURPOSES
-    password = "wryao64_106379276"  # FOR TESTING PURPOSES
-    my_time = ''
-    my_active_usernames = []
+    my_time = time.time()
+    # my_active_usernames = []
     connection_address = ''
     connection_location = ''
 
@@ -140,9 +142,17 @@ def ping_check(username, password):
     json_bytes = json.dumps(payload).encode('utf-8')
 
     data_object = api_helper.get_data(url, headers=headers, data=json_bytes)
-    data_object = json.loads(data_object)
-
-    return data_object
+    print('got data ======================================================')
+    try:
+        data_object = json.loads(data_object)
+        print('json loaded========================================')
+        return data_object['response']
+    except json.decoder.JSONDecodeError:
+        print('decoder error===========================================')
+        return {
+            'response': 'error',
+            'message': data_object['message']
+        }
 
 
 def group_message(username, password, message):
