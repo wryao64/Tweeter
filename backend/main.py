@@ -4,6 +4,7 @@ This program uses the CherryPy web server (from www.cherrypy.org).
 """
 
 import os
+import logging
 
 import cherrypy
 
@@ -16,6 +17,9 @@ LISTEN_PORT = 1025
 
 
 def runMainApp():
+    # set up logging
+    logging.basicConfig(level=logging.ERROR, format='%(levelname)s: %(message)s')
+
     # set up the config
     conf = {
         '/': {

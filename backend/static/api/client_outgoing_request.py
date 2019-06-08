@@ -2,6 +2,7 @@ import json
 import time
 import socket
 import cherrypy
+import logging
 
 import static.utils.api_helper as api_helper
 import static.utils.security_helper as security_helper
@@ -44,7 +45,7 @@ def broadcast(username, password, message):
         # ping client to check if they are online
         response = ping_check(username, password, connection_address)
         if response['response'] != 'ok':
-            print('{}: PingError {}'.format(connection_address, response['message']))
+            logging.warning('{}: Ping error: {}'.format(connection_address, response['message']))
             continue
 
         url = 'http://{}/api/rx_broadcast'.format(connection_address)
@@ -53,9 +54,9 @@ def broadcast(username, password, message):
         
         # add error checking for TypeError? (if others implement broadcast incorrectly)
         if data_object['response'] == 'ok':
-            print('{}: {}'.format(connection_address, data_object['response']))
+            logging.info('{}: {}'.format(connection_address, data_object['response']))
         else:
-            print('{}: {}'.format(connection_address, data_object['message']))
+            logging.warning('{}: {}'.format(connection_address, data_object['message']))
 
     return 'ok'
 
