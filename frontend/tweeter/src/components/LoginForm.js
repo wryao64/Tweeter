@@ -1,5 +1,4 @@
 import React from 'react';
-import TextField from '@material-ui/core/TextField';
 
 class LoginForm extends React.Component {
     constructor(props) {
@@ -27,8 +26,20 @@ class LoginForm extends React.Component {
     }
 
     handleSubmit(event) {
-        alert('Login attempted by: ' + this.state.username);
+        // alert('Login attempted by: ' + this.state.username);
+        fetch('http://172.23.159.9:1025/sign_in',
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: {
+                    username: this.state.username,
+                    password: this.state.password
+                }
+            })
         event.preventDefault();
+        this.props.login(true)
     }
 
     render() {
