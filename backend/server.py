@@ -145,7 +145,7 @@ class MainApp(object):
         password = cherrypy.session.get('password')
 
         response = client_outgoing_request.private_message(
-            username, password, message)
+            username, password, 'wyao332', message)
 
         if response['response'] == 'ok':
             raise cherrypy.HTTPRedirect('/')
@@ -286,6 +286,8 @@ class MainApp(object):
                 Connection Updated At: {}<br/>
                 <br/>
                 """.format(user['incoming_pubkey'], user['username'], user['connection_location'], user['connection_address'], user['status'], user['connection_updated_at'])
+
+                user_repository.post_user_info(user['username'], user['incoming_pubkey'])
         except KeyError:
             Page += data['message']
 

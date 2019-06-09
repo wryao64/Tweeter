@@ -68,29 +68,42 @@ def broadcast(username, password, message):
     return 'ok'
 
 
-def private_message(username, password, message):
+def private_message(username, password, target_username, message):
     """
     Transmits a secret message between users.
     """
-    url = 'http://127.0.0.1:1025/api/rx_privatemessage'
-    # url = 'http://cs302.kiwi.land/api/rx_privatemessage'  # Hammond
+    # sender details
+    loginserver_record = login_server.get_loginserver_record(username, password)[
+        'loginserver_record']
+    ts = time.time()
 
-    username = "wyao332"  # FOR TESTING PURPOSES
-    password = "wryao64_106379276"  # FOR TESTING PURPOSES
-    loginserver_record = 'wyao332,69592f14f52422ecf713b21f1615da2fec7d67eb7f0a8c4d3a72121d8e49cb66,1559114951.7035556,d0a5992d76f5f5464ddc0a530d8ea5f8a99b0fde4e0a3d4b91d100b7515188929ef22801420f25cc0b0f51095fa8cd9fbe6d3c93e1a93b7b2857cafdd6159a0e'
-    pubkey = '69592f14f52422ecf713b21f1615da2fec7d67eb7f0a8c4d3a72121d8e49cb66'
-    ts = '1559114951.7035556'
-    # username = 'admin'
-    # pubkey = '11c8c33b6052ad73a7a29e832e97e31f416dedb7c6731a6f456f83a344488ec0'
+    # receiver details
+    target_pubkey = user_repository.get_pubkey(target_username)
+    isOnline = False
+
+    # finds connection address of receiver
+    connection_address = None
+    users = login_server.list_users(username, password)['users']
+    for user in users:
+        if user['username'] == target_username:
+            isOnline = True
+            connection_address = user['connection_address']
+
+            if target_pubkey != user['incoming_pubkey']:
+                target_pubkey = user['incoming_pubkey']
+                user_repository.post_user_info(username, target_pubkey)
+            break
+
+    # encrypt message
 
     keys = security_helper.get_keys(
-        loginserver_record + pubkey + username + message + str(ts))  # FOR TESTING PURPOSES
+        loginserver_record + target_pubkey + username + message + str(ts))  # FOR TESTING PURPOSES
 
     headers = api_helper.create_header(username, password)
 
     payload = {
         'loginserver_record': loginserver_record,
-        'target_pubkey': pubkey,
+        'target_pubkey': target_pubkey,
         'target_username': username,
         'encrypted_message': message,
         'sender_created_at': str(ts),
@@ -98,8 +111,43 @@ def private_message(username, password, message):
     }
     json_bytes = json.dumps(payload).encode('utf-8')
 
-    data_object = api_helper.get_data(url, headers=headers, data=json_bytes)
-    data_object = json.loads(data_object)
+    # send message
+    pingFailed = False
+    if isOnline:
+        # ping receiver to check if available
+        response = ping_check(username, password, connection_address)
+
+        if response['response'] != 'ok':
+            cherrypy.log('{}: Ping error: {}'.format(
+                connection_address, response['message']))
+            pingFailed = True
+
+        if not pingFailed:
+            # send to receiver
+            url = 'http://{}/api/rx_privatemessage'.format(connection_address)
+
+            data_object = api_helper.get_data(
+                url, headers=headers, data=json_bytes)
+
+            data_object = api_helper.get_data(url, headers=headers, data=json_bytes)
+
+    # send to everyone else
+    if not isOnline or pingFailed:
+        for user in users:
+            response = ping_check(username, password, connection_address)
+
+            if response['response'] != 'ok':
+                cherrypy.log('{}: Ping error: {}'.format(
+                    connection_address, response['message']))
+            else:
+                url = 'http://{}/api/rx_privatemessage'.format(user['connection_address'])
+
+                data_object = api_helper.get_data(
+                    url, headers=headers, data=json_bytes)
+
+                data_object = api_helper.get_data(url, headers=headers, data=json_bytes)
+                cherrypy.log('{}: {}'.format(
+                connection_address, data_object['response']))
 
     return data_object
 
@@ -131,7 +179,8 @@ def check_messages(username, password):
                 connection_address, response['message']))
             continue
 
-        url = 'http://{}/api/checkmessages?since={}'.format(connection_address, last_online)
+        url = 'http://{}/api/checkmessages?since={}'.format(
+            connection_address, last_online)
 
         data_object = api_helper.get_data(
             url, headers=headers)
@@ -142,13 +191,15 @@ def check_messages(username, password):
 
             # post new messages to database
             for b in broadcasts:
-                broadcast_repository.post_broadcast(b['loginserver_record'], b['message'], b['sender_created_at'], b['signature'])
+                broadcast_repository.post_broadcast(
+                    b['loginserver_record'], b['message'], b['sender_created_at'], b['signature'])
 
             for p in private_messages:
-                private_message_repository.post_message(p['loginserver_record'], p['target_pubkey'], p['target_username'], p['encrypted_message'], p['sender_created_at'], p['signature'])
+                private_message_repository.post_message(
+                    p['loginserver_record'], p['target_pubkey'], p['target_username'], p['encrypted_message'], p['sender_created_at'], p['signature'])
 
             cherrypy.log('{}: {}'.format(
-                connection_address, data_object['response'])) 
+                connection_address, data_object['response']))
         else:
             cherrypy.log('{}: {}'.format(
                 connection_address, data_object['message']))

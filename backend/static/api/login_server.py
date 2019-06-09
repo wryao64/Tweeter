@@ -167,7 +167,7 @@ def list_users(username, password):
     Lists the connection details for all active users within the last five minutes
 
     Return:
-        users - Python object
+        data_object - Python object
     """
     url = 'http://cs302.kiwi.land/api/list_users'
 
