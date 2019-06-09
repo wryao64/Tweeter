@@ -1,7 +1,9 @@
 import React from 'react';
 import '../App.css';
+import OnlineUsers from './OnlineUsers'
+import Broadcasts from './Broadcasts'
 
-function HomeComponent() {
+class HomeComponent extends React.Component {
     // const state = {
     //     authenticated: false
     // };
@@ -9,15 +11,15 @@ function HomeComponent() {
     // function login(status) {
     //     state.authenticated = status
     // }
-    
-    return (
-        // <div className="App">
-        //     {state.authenticated ? <div>Auhed</div> : <LoginForm login={login} />}
-        // </div>
-        <div>
-            HomeComponent
-        </div>
-    );
+
+    render() {
+        return (
+            <div className='container'>
+                <OnlineUsers className='onlineUsers' />
+                <Broadcasts className='broadcasts' />
+            </div>
+        );
+    }
 }
 
 export default HomeComponent;

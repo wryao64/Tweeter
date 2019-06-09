@@ -26,6 +26,9 @@ class LoginForm extends React.Component {
     }
 
     handleSubmit(event) {
+        event.preventDefault();
+        console.log(this.state.username)
+        console.log(this.state.password)
         // alert('Login attempted by: ' + this.state.username);
         fetch('http://172.23.159.9:1025/sign_in',
             {
@@ -33,12 +36,12 @@ class LoginForm extends React.Component {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: {
+                body: JSON.stringify({
                     username: this.state.username,
                     password: this.state.password
-                }
+                })
             })
-        event.preventDefault();
+            .then(res => res.json());
         this.props.login(true)
     }
 
