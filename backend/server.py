@@ -465,13 +465,19 @@ class ApiApp(object):
     @cherrypy.tools.json_in()
     @cherrypy.tools.json_out()
     def rx_broadcast(self):
-        loginserver_record = cherrypy.request.json['loginserver_record']
-        message = cherrypy.request.json['message']
-        sender_created_at = cherrypy.request.json['sender_created_at']
-        signature = cherrypy.request.json['signature']
+        try:
+            loginserver_record = cherrypy.request.json['loginserver_record']
+            message = cherrypy.request.json['message']
+            sender_created_at = cherrypy.request.json['sender_created_at']
+            signature = cherrypy.request.json['signature']
 
-        response = client_incoming_request.broadcast(
-            loginserver_record, message, sender_created_at, signature)
+            response = client_incoming_request.broadcast(
+                loginserver_record, message, sender_created_at, signature)
+        except KeyError:
+            response = {
+                'response': 'error',
+                'message': 'KeyError: key named incorrectly'
+            }
 
         return response
 
@@ -479,15 +485,21 @@ class ApiApp(object):
     @cherrypy.tools.json_in()
     @cherrypy.tools.json_out()
     def rx_privatemessage(self):
-        loginserver_record = cherrypy.request.json['loginserver_record']
-        target_pubkey = cherrypy.request.json['target_pubkey']
-        target_username = cherrypy.request.json['target_username']
-        encrypted_message = cherrypy.request.json['encrypted_message']
-        sender_created_at = cherrypy.request.json['sender_created_at']
-        signature = cherrypy.request.json['signature']
+        try:
+            loginserver_record = cherrypy.request.json['loginserver_record']
+            target_pubkey = cherrypy.request.json['target_pubkey']
+            target_username = cherrypy.request.json['target_username']
+            encrypted_message = cherrypy.request.json['encrypted_message']
+            sender_created_at = cherrypy.request.json['sender_created_at']
+            signature = cherrypy.request.json['signature']
 
-        response = client_incoming_request.private_message(
-            loginserver_record, target_pubkey, target_username, encrypted_message, sender_created_at, signature)
+            response = client_incoming_request.private_message(
+                loginserver_record, target_pubkey, target_username, encrypted_message, sender_created_at, signature)
+        except KeyError:
+            response = {
+                'response': 'error',
+                'message': 'KeyError: key named incorrectly'
+            }
 
         return response
 

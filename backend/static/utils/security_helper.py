@@ -13,7 +13,10 @@ def decrypt_data(key, data):
     box = generate_secret_box(key)
 
     data_bytes = base64.b64decode(data)
-    decrypted_str = box.decrypt(data_bytes).decode('utf-8')
+    try:
+        decrypted_str = box.decrypt(data_bytes).decode('utf-8')
+    except nacl.exceptions.CryptoError as e:
+        decrypted_str = e
 
     return decrypted_str
 

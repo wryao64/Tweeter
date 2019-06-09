@@ -39,18 +39,25 @@ def broadcast(username, password, message):
     json_bytes = json.dumps(payload).encode('utf-8')
 
     # broadcast to everyone that's online
-    # users = login_server.list_users(username, password)['users]
+    users = login_server.list_users(username, password)['users']
     # users = [{'connection_address':'210.54.33.182:80'}]
-    users = [{'connection_address': '127.0.0.1:1025'}]
+    # users = [{'connection_address': '127.0.0.1:10025'}]
 
     for user in users:
         connection_address = user['connection_address']
 
         # ping client to check if they are online
         response = ping_check(username, password, connection_address)
-        if response['response'] != 'ok':
-            cherrypy.log('{}: Ping error: {}'.format(
-                connection_address, response['message']))
+        try:
+            if response['response'] != 'ok':
+                cherrypy.log('{}: Ping error: {}'.format(
+                    connection_address, response['message']))
+                continue
+        except KeyError:
+            continue
+        except TypeError:
+            continue
+        except json.decoder.JSONDecodeError:
             continue
 
         url = 'http://{}/api/rx_broadcast'.format(connection_address)
@@ -58,12 +65,19 @@ def broadcast(username, password, message):
         data_object = api_helper.get_data(
             url, headers=headers, data=json_bytes)
 
-        if data_object['response'] == 'ok':
-            cherrypy.log('{}: {}'.format(
-                connection_address, data_object['response']))
-        else:
-            cherrypy.log('{}: {}'.format(
-                connection_address, data_object['message']))
+        try:
+            if data_object['response'] == 'ok':
+                cherrypy.log('{}: {}'.format(
+                    connection_address, data_object['response']))
+            else:
+                cherrypy.log('{}: {}'.format(
+                    connection_address, data_object['message']))
+        except TypeError:
+            continue
+        except KeyError:
+            continue
+        except json.decoder.JSONDecodeError:
+            continue
 
     return 'ok'
 
