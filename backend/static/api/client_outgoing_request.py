@@ -95,9 +95,13 @@ def private_message(username, password, target_username, message):
             break
 
     # encrypt message
+    key = 'key'
+    encrypted_message = security_helper.encrypt_data(key, message)
 
-    keys = security_helper.get_keys(
-        loginserver_record + target_pubkey + username + message + str(ts))  # FOR TESTING PURPOSES
+    prikey = login_server.get_privatekey(username, password)
+    pubkey = security_helper.get_public_key(prikey)
+    message_data = loginserver_record + target_pubkey + username + message + str(ts)
+    signature = security_helper.get_signature(prikey, pubkey, message_data=message_data)
 
     headers = api_helper.create_header(username, password)
 
@@ -105,9 +109,9 @@ def private_message(username, password, target_username, message):
         'loginserver_record': loginserver_record,
         'target_pubkey': target_pubkey,
         'target_username': username,
-        'encrypted_message': message,
+        'encrypted_message': encrypted_message,
         'sender_created_at': str(ts),
-        'signature': keys['signature'],
+        'signature': signature,
     }
     json_bytes = json.dumps(payload).encode('utf-8')
 
