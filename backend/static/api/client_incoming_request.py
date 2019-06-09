@@ -1,6 +1,7 @@
 import json
 import cherrypy
 
+import static.utils.security_helper as security_helper
 import static.repositories.broadcast_repository as broadcast_repository
 import static.repositories.private_message_repository as private_message_repository
 import static.repositories.group_message_repository as group_message_repository
@@ -17,10 +18,12 @@ def broadcast(loginserver_record, message, sender_created_at, signature):
     username = details[0]
     password = details[1]
 
+    # details of sender
     record = loginserver_record.split(',')
-    target_pubkey = record[1]
+    sender_pubkey = record[1]
 
-    response = login_server.check_pubkey(username, password, target_pubkey)
+    # check if details of sender matches
+    response = login_server.check_pubkey(username, password, sender_pubkey)
     if response['response'] == 'ok':
         if response['loginserver_record'] == loginserver_record:
             # store in database
@@ -47,19 +50,39 @@ def private_message(loginserver_record, target_pubkey, target_username, encrypte
     """
     Transmits a secret message between users.
     """
-    # authenticate
+    # details of receiver
+    details = user_repository.get_user()
+    username = details[0]
+    password = details[1]
 
-    # send to database
-    private_message_repository.post_message(
-        loginserver_record, target_pubkey, target_username, encrypted_message, sender_created_at, signature)
+    # details of sender
+    record = loginserver_record.split(',')
+    sender_pubkey = record[1]
 
-    data_object = {
-        'response': 'ok'
-    }
-    # data_object = {
-    #     'response': 'error',
-    #     'message': 'Error: ###',
-    # }
+    # check if details of sender matches
+    response = login_server.check_pubkey(username, password, sender_pubkey)
+    if response['response'] == 'ok':
+        if response['loginserver_record'] == loginserver_record:
+            # decrypt message
+            key = 'key'  # FOR TESTING PURPOSES
+            decrypted_message = security_helper.decrypt_data(key, encrypted_message)
+
+            # send to database
+            private_message_repository.post_message(
+                loginserver_record, target_pubkey, target_username, decrypted_message, sender_created_at, signature)
+            
+            data_object = {
+                'response': 'ok'
+            }
+        else:
+            cherrypy.log('Login Server Record does not match')
+            data_object = {
+                'response': 'error',
+                'message': 'Error: Login Server Record does not match',
+            }
+    else:
+        cherrypy.log('Pubkey error')
+        data_object = response
 
     return data_object
 

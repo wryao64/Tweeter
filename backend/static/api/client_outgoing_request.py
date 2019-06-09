@@ -100,8 +100,10 @@ def private_message(username, password, target_username, message):
 
     prikey = login_server.get_privatekey(username, password)
     pubkey = security_helper.get_public_key(prikey)
-    message_data = loginserver_record + target_pubkey + username + message + str(ts)
-    signature = security_helper.get_signature(prikey, pubkey, message_data=message_data)
+    message_data = loginserver_record + \
+        target_pubkey + username + message + str(ts)
+    signature = security_helper.get_signature(
+        prikey, pubkey, message_data=message_data)
 
     headers = api_helper.create_header(username, password)
 
@@ -133,8 +135,6 @@ def private_message(username, password, target_username, message):
             data_object = api_helper.get_data(
                 url, headers=headers, data=json_bytes)
 
-            data_object = api_helper.get_data(url, headers=headers, data=json_bytes)
-
     # send to everyone else
     if not isOnline or pingFailed:
         for user in users:
@@ -144,14 +144,16 @@ def private_message(username, password, target_username, message):
                 cherrypy.log('{}: Ping error: {}'.format(
                     connection_address, response['message']))
             else:
-                url = 'http://{}/api/rx_privatemessage'.format(user['connection_address'])
+                url = 'http://{}/api/rx_privatemessage'.format(
+                    user['connection_address'])
 
                 data_object = api_helper.get_data(
                     url, headers=headers, data=json_bytes)
 
-                data_object = api_helper.get_data(url, headers=headers, data=json_bytes)
+                data_object = api_helper.get_data(
+                    url, headers=headers, data=json_bytes)
                 cherrypy.log('{}: {}'.format(
-                connection_address, data_object['response']))
+                    connection_address, data_object['response']))
 
     return data_object
 

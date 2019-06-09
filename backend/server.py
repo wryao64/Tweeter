@@ -218,8 +218,8 @@ class MainApp(object):
 
     # Logging in and out
     @cherrypy.expose
-    @cherrypy.tools.json_in()
-    @cherrypy.tools.json_out()
+    # @cherrypy.tools.json_in()
+    # @cherrypy.tools.json_out()
     def sign_in(self, username=None, password=None):
         """Check their name and password and send them either to the main page, or back to the main login screen."""
         response = login_server.login(username, password)
@@ -230,17 +230,17 @@ class MainApp(object):
             user_repository.post_user(username, password)
             ts = time.time()
             user_repository.post_login_time(username, ts)
-            # raise cherrypy.HTTPRedirect('/')
+            raise cherrypy.HTTPRedirect('/')
 
             # tell user they are online
-            return {'response': 'ok'}
+            # return {'response': 'ok'}
 
         else:
-            return {
-                'response': 'error',
-                'message': 'wrong username or password'
-            }
-            # raise cherrypy.HTTPRedirect('/login?bad_attempt=1')
+            # return {
+            #     'response': 'error',
+            #     'message': 'wrong username or password'
+            # }
+            raise cherrypy.HTTPRedirect('/login?bad_attempt=1')
 
     @cherrypy.expose
     def sign_out(self):
