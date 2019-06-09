@@ -191,9 +191,12 @@ def login(username, password):
     ping_response = ping(username, password)
 
     if ping_response['response'] == 'ok':
+        cherrypy.log('Ping: {}'.format(ping_response['response']))
         response = report_user_status(username, password, 'online')
+        cherrypy.log('Report: {}'.format(ping_response['response']))
         return response
     else:
+        cherrypy.log('Ping: {}'.format(ping_response['message']))
         return ping_response
 
 
