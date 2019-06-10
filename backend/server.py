@@ -144,23 +144,25 @@ class MainApp(object):
             """.format(cherrypy.session['username'])
 
             Page += """
-            <h3>Private Message</h3>
-            <form action="/private_message" method="post" enctype="multipart/form-data">
-                Username: <input type='text' name='target_username'/><br>
-                Message: <input type="message" name="message"/><br>
-            <input type="submit" value="Send"/></form>
+            <div class='private-messages'>
+                <h3>Private Message</h3>
+                <form action="/private_message" method="post" enctype="multipart/form-data">
+                    Username: <input type='text' name='target_username'/><br>
+                    Message: <input type="message" name="message"/><br>
+                <input type="submit" value="Send"/></form>
             """
 
             private_messages = private_message_repository.get_messages()
 
             if len(private_messages) == 0:
-                Page += 'There are no messages'
+                Page += 'There are no messages</div>'
             else:
                 for message in private_messages:
                     loginserver_record = message[0].split(',')
                     sender = loginserver_record[0]
                     message = message[3]
                     Page += '{}: {}<br/><br/>'.format(sender, message)
+                Page += '</div>'
         except KeyError:
             raise cherrypy.HTTPRedirect('/login')            
 
@@ -173,7 +175,7 @@ class MainApp(object):
         try:
             Page += """
             <div class='welcome'>
-            Hi {}! These are your private messages!<br>
+            Hi {}! These are your group messages!<br>
             <a href="/sign_out">Sign out</a>
             </div>
             
@@ -182,28 +184,30 @@ class MainApp(object):
             """.format(cherrypy.session['username'])
 
             Page += """
+            <div class='group-messages'>
             <h3>Group Message</h3>
-            <form action="/group_message" method="post" enctype="multipart/form-data">
-                Message: <input type="message" name="message"/><br/>
-            <input type="submit" value="Send"/></form>
+                <form action="/group_message" method="post" enctype="multipart/form-data">
+                    Message: <input type="message" name="message"/><br/>
+                <input type="submit" value="Send"/></form>
 
-            <h3>Group Invite</h3>
-            <form action="/group_invite" method="post" enctype="multipart/form-data">
-                Username: <input type="username" name="username"/><br/>
-            <input type="submit" value="Send"/></form>
+                <h3>Group Invite</h3>
+                <form action="/group_invite" method="post" enctype="multipart/form-data">
+                    Username: <input type="username" name="username"/><br/>
+                <input type="submit" value="Send"/></form>
             """
 
             group_messages = group_message_repository.get_messages()
 
             Page += '<h3>Group Messages</h3>'
             if len(group_messages) == 0:
-                Page += 'There are no messages'
+                Page += 'There are no messages</div>'
             else:
                 for message in group_messages:
                     loginserver_record = message[0].split(',')
                     sender = loginserver_record[0]
                     message = message[2]
                     Page += '{}: {}<br/><br/>'.format(sender, message)
+                Page += '</div>'
         except KeyError:
             raise cherrypy.HTTPRedirect('/login')            
         
