@@ -55,8 +55,6 @@ def broadcast(username, password, message):
             continue
         except TypeError:
             continue
-        except json.decoder.JSONDecodeError:
-            continue
 
         url = 'http://{}/api/rx_broadcast'.format(connection_address)
 
@@ -213,9 +211,15 @@ def check_messages(username, password):
 
         # ping client to check if they are online
         response = ping_check(username, password, connection_address)
-        if response['response'] != 'ok':
-            cherrypy.log('{}: Ping error: {}'.format(
-                connection_address, response['message']))
+
+        try:
+            if response['response'] != 'ok':
+                cherrypy.log('{}: Ping error: {}'.format(
+                    connection_address, response['message']))
+                continue
+        except KeyError:
+            continue
+        except TypeError:
             continue
 
         url = 'http://{}/api/checkmessages?since={}'.format(
@@ -224,24 +228,31 @@ def check_messages(username, password):
         data_object = api_helper.get_data(
             url, headers=headers)
 
-        if data_object['response'] == 'ok':
-            broadcasts = data_object['broadcasts']
-            private_messages = data_object['private_messages']
+        try:
+            if data_object['response'] == 'ok':
+                broadcasts = data_object['broadcasts']
+                private_messages = data_object['private_messages']
 
-            # post new messages to database
-            for b in broadcasts:
-                broadcast_repository.post_broadcast(
-                    b['loginserver_record'], b['message'], b['sender_created_at'], b['signature'])
+                # post new messages to database
+                for b in broadcasts:
+                    broadcast_repository.post_broadcast(
+                        b['loginserver_record'], b['message'], b['sender_created_at'], b['signature'])
 
-            for p in private_messages:
-                private_message_repository.post_message(
-                    p['loginserver_record'], p['target_pubkey'], p['target_username'], p['encrypted_message'], p['sender_created_at'], p['signature'])
+                for p in private_messages:
+                    private_message_repository.post_message(
+                        p['loginserver_record'], p['target_pubkey'], p['target_username'], p['encrypted_message'], p['sender_created_at'], p['signature'])
 
-            cherrypy.log('{}: {}'.format(
-                connection_address, data_object['response']))
-        else:
-            cherrypy.log('{}: {}'.format(
-                connection_address, data_object['message']))
+                cherrypy.log('{}: {}'.format(
+                    connection_address, data_object['response']))
+            else:
+                cherrypy.log('{}: {}'.format(
+                    connection_address, data_object['message']))
+        except KeyError:
+            continue
+        except TypeError:
+            continue
+        except json.decoder.JSONDecodeError:
+            continue
 
     return data_object
 

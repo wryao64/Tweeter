@@ -15,9 +15,11 @@ startHTML = """<html>
                     <title>Python Project</title>
                     <link rel="stylesheet" href="/static/css/styles.css" />
                 </head>
-                
+
                 <body>
-                    <a href="/">home</a><br/>
+                    <a href="/">Home</a><br/>
+                    <a href="/private_messages">Private Messages</a><br/>
+                    <a href="/group_messages">Group Messages</a><br/>
 
                     <h1>LS endpoints</h1>
                     <a href="list_users">list online users</a><br/>
@@ -30,7 +32,7 @@ startHTML = """<html>
                     <a href="list_apis">list apis</a><br/>
                     <a href="load_new_apikey">load new apikey</a><br/>
 
-                    <br/>                   
+                    <br/>
 
             """
 
@@ -72,22 +74,7 @@ class MainApp(object):
             <form action="/broadcast_message" method="post" enctype="multipart/form-data">
             Message: <input type="message" name="message"/><br/>
             <input type="submit" value="Send"/></form>
-            
-            <h3>Private Message</h3>
-            <form action="/private_message" method="post" enctype="multipart/form-data">
-            Message: <input type="message" name="message"/><br/>
-            <input type="submit" value="Send"/></form>
 
-            <h3>Group Message</h3>
-            <form action="/group_message" method="post" enctype="multipart/form-data">
-            Message: <input type="message" name="message"/><br/>
-            <input type="submit" value="Send"/></form>
-
-            <h3>Group Invite</h3>
-            <form action="/group_invite" method="post" enctype="multipart/form-data">
-            Username: <input type="username" name="username"/><br/>
-            <input type="submit" value="Send"/></form>
-        
             <h3>Check Messages</h3>
             <a href="check_messages">Check</a>
             <h3>Ping Check</h3>
@@ -104,27 +91,73 @@ class MainApp(object):
                 for broadcast in broadcasts:
                     Page += str(broadcast) + '<br/><br/>'
 
-            private_messages = private_message_repository.get_messages()
-
-            Page += '<h3>Private Messages</h3>'
-            if len(private_messages) == 0:
-                Page += 'There are no messages'
-            else:
-                for message in private_messages:
-                    Page += str(message) + '<br/><br/>'
-
-            group_messages = group_message_repository.get_messages()
-
-            Page += '<h3>Group Messages</h3>'
-            if len(group_messages) == 0:
-                Page += 'There are no messages'
-            else:
-                for message in group_messages:
-                    Page += str(message) + '<br/><br/>'
+            
         except KeyError:  # There is no username
             Page += 'Click here to <a href="login">login</a>.'
         return Page
-        # return open('static/build/index.html')
+        # return open('static/frontend/index.html')
+
+    @cherrypy.expose
+    def login(self, bad_attempt=0):
+        Page = startHTML
+
+        if bad_attempt != 0:
+            Page += '<font color="red">Invalid username/password!</font>'
+
+        Page += '<form action="/sign_in" method="post" enctype="multipart/form-data">'
+        Page += 'Username: <input type="text" name="username"/><br/>'
+        Page += 'Password: <input type="password" name="password"/><br/>'
+        Page += '<input type="submit" value="Login"/></form>'
+        return Page
+
+    @cherrypy.expose
+    def private_messages(self):
+        Page = startHTML
+
+        Page += """
+        <h3>Private Message</h3>
+        <form action="/private_message" method="post" enctype="multipart/form-data">
+            Username: <input type='text' name='target_username'/><br>
+            Message: <input type="message" name="message"/><br>
+        <input type="submit" value="Send"/></form>
+        """
+
+        private_messages = private_message_repository.get_messages()
+
+        if len(private_messages) == 0:
+            Page += 'There are no messages'
+        else:
+            for message in private_messages:
+                Page += str(message) + '<br/><br/>'
+
+        return Page
+
+    @cherrypy.expose
+    def group_messages(self):
+        Page = startHTML
+
+        Page += """
+        <h3>Group Message</h3>
+        <form action="/group_message" method="post" enctype="multipart/form-data">
+            Message: <input type="message" name="message"/><br/>
+        <input type="submit" value="Send"/></form>
+
+        <h3>Group Invite</h3>
+        <form action="/group_invite" method="post" enctype="multipart/form-data">
+            Username: <input type="username" name="username"/><br/>
+        <input type="submit" value="Send"/></form>
+        """
+
+        group_messages = group_message_repository.get_messages()
+
+        Page += '<h3>Group Messages</h3>'
+        if len(group_messages) == 0:
+            Page += 'There are no messages'
+        else:
+            for message in group_messages:
+                Page += str(message) + '<br/><br/>'
+        
+        return Page
 
     @cherrypy.expose
     def broadcast_message(self, message=None):
@@ -140,17 +173,17 @@ class MainApp(object):
             raise cherrypy.HTTPRedirect('/')
 
     @cherrypy.expose
-    def private_message(self, message=None):
+    def private_message(self, message=None, target_username=None):
         username = cherrypy.session.get('username')
         password = cherrypy.session.get('password')
 
         response = client_outgoing_request.private_message(
-            username, password, 'ezou149', message)
+            username, password, target_username, message)
 
         if response['response'] == 'ok':
-            raise cherrypy.HTTPRedirect('/')
+            raise cherrypy.HTTPRedirect('/private_messages')
         else:
-            raise cherrypy.HTTPRedirect('/')
+            raise cherrypy.HTTPRedirect('/private_messages')
 
     @cherrypy.expose
     def group_message(self, message=None):
@@ -203,23 +236,8 @@ class MainApp(object):
         else:
             raise cherrypy.HTTPRedirect('/')
 
-    @cherrypy.expose
-    def login(self, bad_attempt=0):
-        Page = startHTML
-
-        if bad_attempt != 0:
-            Page += '<font color="red">Invalid username/password!</font>'
-
-        Page += '<form action="/sign_in" method="post" enctype="multipart/form-data">'
-        Page += 'Username: <input type="text" name="username"/><br/>'
-        Page += 'Password: <input type="password" name="password"/><br/>'
-        Page += '<input type="submit" value="Login"/></form>'
-        return Page
-
     # Logging in and out
     @cherrypy.expose
-    # @cherrypy.tools.json_in()
-    # @cherrypy.tools.json_out()
     def sign_in(self, username=None, password=None):
         """Check their name and password and send them either to the main page, or back to the main login screen."""
         response = login_server.login(username, password)
@@ -230,16 +248,10 @@ class MainApp(object):
             user_repository.post_user(username, password)
             ts = time.time()
             user_repository.post_login_time(username, ts)
-            raise cherrypy.HTTPRedirect('/')
 
-            # tell user they are online
-            # return {'response': 'ok'}
-
+            # check for messages sent while offline
+            raise cherrypy.HTTPRedirect('/check_messages')
         else:
-            # return {
-            #     'response': 'error',
-            #     'message': 'wrong username or password'
-            # }
             raise cherrypy.HTTPRedirect('/login?bad_attempt=1')
 
     @cherrypy.expose
@@ -294,7 +306,8 @@ class MainApp(object):
                 <br/>
                 """.format(user['incoming_pubkey'], user['username'], user['connection_location'], user['connection_address'], user['status'], user['connection_updated_at'])
 
-                user_repository.post_user_info(user['username'], user['incoming_pubkey'])
+                user_repository.post_user_info(
+                    user['username'], user['incoming_pubkey'])
         except KeyError:
             Page += data['message']
 

@@ -3,7 +3,7 @@ import '../App.css';
 
 class Broadcasts extends React.Component {
     getBroadcasts() {
-        fetch('http://172.23.159.9:1025/sign_in',
+        fetch('http://172.23.159.9:1025/',
             {
                 method: 'GET',
                 headers: {
