@@ -21,6 +21,21 @@ def decrypt_data(key, data):
     return decrypted_str
 
 
+def decrypt_message(priv_key, message):
+    """
+    Decrypts a message
+    """
+    signing_key = nacl.signing.SigningKey(
+        priv_key, encoder=nacl.encoding.HexEncoder)
+    priv_key = signing_key.to_curve25519_private_key()
+    unsealed_box = nacl.public.SealedBox(priv_key)
+    decrypted_message = unsealed_box.decrypt(
+        message, encoder=nacl.encoding.HexEncoder)
+    decrypted_message = decrypted_message.decode('utf-8')
+
+    return decrypted_message
+
+
 def encrypt_data(key, data):
     """
     Encrypts user's private data using Secret Key Encryption
@@ -35,6 +50,23 @@ def encrypt_data(key, data):
     encrypted_str = base64.b64encode(encrypted_bytes).decode('utf-8')
 
     return encrypted_str
+
+
+def encrypt_message(target_pubkey, message):
+    """
+    Encrypts a message
+    """
+    byte_message = bytes(message, encoding='utf-8')
+
+    verify_key = nacl.signing.VerifyKey(
+        target_pubkey, encoder=nacl.encoding.HexEncoder)
+    pubkey = verify_key.to_curve25519_public_key()
+    sealed_box = nacl.public.SealedBox(pubkey)
+    encrypted_message = sealed_box.encrypt(
+        byte_message, encoder=nacl.encoding.HexEncoder)
+    encrypted_message = encrypted_message.decode('utf-8')
+
+    return encrypted_message
 
 
 def generate_private_key():

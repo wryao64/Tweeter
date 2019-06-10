@@ -145,7 +145,7 @@ class MainApp(object):
         password = cherrypy.session.get('password')
 
         response = client_outgoing_request.private_message(
-            username, password, 'wyao332', message)
+            username, password, 'ezou149', message)
 
         if response['response'] == 'ok':
             raise cherrypy.HTTPRedirect('/')

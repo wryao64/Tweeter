@@ -76,9 +76,8 @@ def broadcast(username, password, message):
             continue
         except KeyError:
             continue
-        except json.decoder.JSONDecodeError:
-            continue
 
+    cherrypy.log('Broadcast sent')
     return 'ok'
 
 
@@ -93,6 +92,7 @@ def private_message(username, password, target_username, message):
 
     # receiver details
     target_pubkey = user_repository.get_pubkey(target_username)
+
     isOnline = False
 
     # finds connection address of receiver
@@ -100,74 +100,95 @@ def private_message(username, password, target_username, message):
     users = login_server.list_users(username, password)['users']
     for user in users:
         if user['username'] == target_username:
+            cherrypy.log('{} is online'.format(target_username))
             isOnline = True
             connection_address = user['connection_address']
 
             if target_pubkey != user['incoming_pubkey']:
                 target_pubkey = user['incoming_pubkey']
-                user_repository.post_user_info(username, target_pubkey)
+                user_repository.post_user_info(target_username, target_pubkey)
+                cherrypy.log('updated user\'s pubkey')
             break
 
-    # encrypt message
-    key = 'key'
-    encrypted_message = security_helper.encrypt_data(key, message)
+    if target_pubkey != None:
+        # encrypt message
+        encrypted_message = security_helper.encrypt_message(target_pubkey, message)
 
-    prikey = login_server.get_privatekey(username, password)
-    pubkey = security_helper.get_public_key(prikey)
-    message_data = loginserver_record + \
-        target_pubkey + username + message + str(ts)
-    signature = security_helper.get_signature(
-        prikey, pubkey, message_data=message_data)
+        prikey = login_server.get_privatekey(username, password)
+        pubkey = security_helper.get_public_key(prikey)
+        message_data = loginserver_record + \
+            target_pubkey + username + message + str(ts)
+        signature = security_helper.get_signature(
+            prikey, pubkey, message_data=message_data)
 
-    headers = api_helper.create_header(username, password)
+        headers = api_helper.create_header(username, password)
 
-    payload = {
-        'loginserver_record': loginserver_record,
-        'target_pubkey': target_pubkey,
-        'target_username': username,
-        'encrypted_message': encrypted_message,
-        'sender_created_at': str(ts),
-        'signature': signature,
-    }
-    json_bytes = json.dumps(payload).encode('utf-8')
+        payload = {
+            'loginserver_record': loginserver_record,
+            'target_pubkey': target_pubkey,
+            'target_username': target_username,
+            'encrypted_message': encrypted_message,
+            'sender_created_at': str(ts),
+            'signature': signature,
+        }
+        json_bytes = json.dumps(payload).encode('utf-8')
 
-    # send message
-    pingFailed = False
-    if isOnline:
-        # ping receiver to check if available
-        response = ping_check(username, password, connection_address)
-
-        if response['response'] != 'ok':
-            cherrypy.log('{}: Ping error: {}'.format(
-                connection_address, response['message']))
-            pingFailed = True
-
-        if not pingFailed:
-            # send to receiver
-            url = 'http://{}/api/rx_privatemessage'.format(connection_address)
-
-            data_object = api_helper.get_data(
-                url, headers=headers, data=json_bytes)
-
-    # send to everyone else
-    if not isOnline or pingFailed:
-        for user in users:
+        # send message
+        pingFailed = False
+        if isOnline:
+            # ping receiver to check if available
             response = ping_check(username, password, connection_address)
 
             if response['response'] != 'ok':
                 cherrypy.log('{}: Ping error: {}'.format(
                     connection_address, response['message']))
-            else:
-                url = 'http://{}/api/rx_privatemessage'.format(
-                    user['connection_address'])
+                pingFailed = True
+
+            if not pingFailed:
+                # send to receiver
+                url = 'http://{}/api/rx_privatemessage'.format(connection_address)
 
                 data_object = api_helper.get_data(
                     url, headers=headers, data=json_bytes)
+                cherrypy.log('Private message sent (recipient)')            
 
-                data_object = api_helper.get_data(
-                    url, headers=headers, data=json_bytes)
-                cherrypy.log('{}: {}'.format(
-                    connection_address, data_object['response']))
+        # send to everyone else
+        if not isOnline or pingFailed:
+            for user in users:
+                response = ping_check(username, password, user['connection_address'])
+
+                try:
+                    if response['response'] != 'ok':
+                        cherrypy.log('{}: Ping error: {}'.format(
+                            user['connection_address'], response['message']))
+                        data_object = {
+                            'response': 'error',
+                            'message': 'Ping error'
+                        }
+                    else:
+                        url = 'http://{}/api/rx_privatemessage'.format(
+                            user['connection_address'])
+
+                        data_object = api_helper.get_data(
+                            url, headers=headers, data=json_bytes)
+
+                        data_object = api_helper.get_data(
+                            url, headers=headers, data=json_bytes)
+                        cherrypy.log('{}: {}'.format(
+                            user['connection_address'], data_object['response']))
+                except TypeError:
+                    continue
+                except KeyError:
+                    continue
+
+            cherrypy.log('Private message sent (everyone)')
+    else:
+        cherrypy.log('No target pubkey')
+
+        data_object = {
+            'response': 'error',
+            'message': 'No pubkey for target user'
+        } 
 
     return data_object
 

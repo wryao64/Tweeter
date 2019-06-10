@@ -33,6 +33,7 @@ def broadcast(loginserver_record, message, sender_created_at, signature):
             data_object = {
                 'response': 'ok'
             }
+            cherrypy.log('Broadcast received')
         else:
             cherrypy.log('Login Server Record does not match')
             data_object = {
@@ -54,6 +55,7 @@ def private_message(loginserver_record, target_pubkey, target_username, encrypte
     details = user_repository.get_user()
     username = details[0]
     password = details[1]
+    priv_key = login_server.get_privatekey(username, password)
 
     # details of sender
     record = loginserver_record.split(',')
@@ -64,8 +66,7 @@ def private_message(loginserver_record, target_pubkey, target_username, encrypte
     if response['response'] == 'ok':
         if response['loginserver_record'] == loginserver_record:
             # decrypt message
-            key = 'key'  # FOR TESTING PURPOSES
-            decrypted_message = security_helper.decrypt_data(key, encrypted_message)
+            decrypted_message = security_helper.decrypt_message(priv_key, encrypted_message)
 
             # send to database
             private_message_repository.post_message(
@@ -74,6 +75,7 @@ def private_message(loginserver_record, target_pubkey, target_username, encrypte
             data_object = {
                 'response': 'ok'
             }
+            cherrypy.log('Private message received')
         else:
             cherrypy.log('Login Server Record does not match')
             data_object = {
