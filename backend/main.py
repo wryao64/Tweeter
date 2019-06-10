@@ -4,6 +4,7 @@ This program uses the CherryPy web server (from www.cherrypy.org).
 """
 
 import os
+import socket
 
 import cherrypy
 
@@ -12,6 +13,7 @@ import server
 # The address we listen for connections on
 # LISTEN_IP = "127.0.0.1"  # local
 LISTEN_IP = '172.23.159.9'  # uni
+# LISTEN_IP = socket.gethostbyname(socket.gethostname())
 LISTEN_PORT = 10025
 
 

@@ -41,7 +41,7 @@ def broadcast(loginserver_record, message, sender_created_at, signature):
                 'message': 'Error: Login Server Record does not match',
             }
     else:
-        cherrypy.log('Pubkey error')
+        cherrypy.log('Pubkey error (broadcast)')
         data_object = response
 
     return data_object
@@ -83,7 +83,7 @@ def private_message(loginserver_record, target_pubkey, target_username, encrypte
                 'message': 'Error: Login Server Record does not match',
             }
     else:
-        cherrypy.log('Pubkey error')
+        cherrypy.log('Pubkey error (private message)')
         data_object = response
 
     return data_object
