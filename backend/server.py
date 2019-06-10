@@ -304,8 +304,7 @@ class MainApp(object):
             user_repository.post_login_time(username, ts)
 
             # check for messages sent while offline
-            # raise cherrypy.HTTPRedirect('/check_messages')  # TURNED OFF FOR TESTING
-            raise cherrypy.HTTPRedirect('/')
+            raise cherrypy.HTTPRedirect('/check_messages')
         else:
             raise cherrypy.HTTPRedirect('/login?bad_attempt=1')
 
