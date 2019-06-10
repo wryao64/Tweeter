@@ -18,6 +18,16 @@ LISTEN_PORT = 10025
 
 
 def runMainApp():
+    def cors():
+        if cherrypy.request.method == 'OPTIONS':
+            # preflight request
+            cherrypy.response.headers['Access-Control-Allow-Methods'] = 'POST'
+            cherrypy.response.headers['Access-Control-Allow-Headers'] = 'content-type'
+            cherrypy.response.headers['Access-Control-Allow-Origin'] = '*'
+            return True
+        else:
+            cherrypy.response.headers['Access-Control-Allow-Origin'] = '*'
+
     # set up the config
     conf = {
         '/': {
@@ -38,6 +48,8 @@ def runMainApp():
     cherrypy.site = {
         'base_path': os.getcwd()
     }
+
+    cherrypy.tools.cors = cherrypy._cptools.HandlerTool(cors)
 
     # Create an instance of server Apps and tell CherryPy to send all requests to relevant endpoints
     cherrypy.tree.mount(server.MainApp(), "/", conf)
