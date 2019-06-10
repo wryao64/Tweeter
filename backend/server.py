@@ -423,20 +423,20 @@ class MainApp(object):
 
         for d in data:
             if d != '/rx_broadcast' and d != '/rx_privatemessage':
-                Page += f"""
-                <strong>API: {d}</strong><br/>
-                Method: {data[d]['method']}<br/>
-                Requires auth: {data[d]['requires_auth']}<br/>
-                Purpose: {data[d]['purpose']}<br/>
+                Page += """
+                <strong>API: {}</strong><br/>
+                Method: {}<br/>
+                Requires auth: {}<br/>
+                Purpose: {}<br/>
                 <br/>
-                """
+                """.format(d, data[d]['method'], data[d]['requires_auth'], data[d]['purpose'])
             else:
-                Page += f"""
-                <strong>API: {d}</strong><br/>
-                Method: {data[d]['method']}<br/>
-                Purpose: {data[d]['purpose']}<br/>
+                Page += """
+                <strong>API: {}</strong><br/>
+                Method: {}<br/>
+                Purpose: {}<br/>
                 <br/>
-                """
+                """.format(d, data[d]['method'], data[d]['purpose'])
 
         return Page
 
