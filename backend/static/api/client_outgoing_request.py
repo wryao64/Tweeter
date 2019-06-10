@@ -40,8 +40,6 @@ def broadcast(username, password, message):
 
     # broadcast to everyone that's online
     users = login_server.list_users(username, password)['users']
-    # users = [{'connection_address':'210.54.33.182:80'}]
-    # users = [{'connection_address': '127.0.0.1:10025'}]
 
     for user in users:
         connection_address = user['connection_address']
@@ -290,8 +288,6 @@ def group_message(username, password, message):
     """
     url = 'http://172.23.159.9:1025/api/rx_groupmessage'  # uni
 
-    username = "wyao332"  # FOR TESTING PURPOSES
-    password = "wryao64_106379276"  # FOR TESTING PURPOSES
     loginserver_record = 'wyao332,69592f14f52422ecf713b21f1615da2fec7d67eb7f0a8c4d3a72121d8e49cb66,1559114951.7035556,d0a5992d76f5f5464ddc0a530d8ea5f8a99b0fde4e0a3d4b91d100b7515188929ef22801420f25cc0b0f51095fa8cd9fbe6d3c93e1a93b7b2857cafdd6159a0e'
     groupkey_hash = '69592f14f52422ecf713b21f1615da2fec7d67eb7f0a8c4d3a72121d8e49cb66'
     ts = '1559114951.7035556'
@@ -322,8 +318,6 @@ def group_invite(username, password, target_username):
     """
     url = 'http://172.23.159.9:1025/api/rx_groupinvite'  # uni
 
-    username = "wyao332"  # FOR TESTING PURPOSES
-    password = "wryao64_106379276"  # FOR TESTING PURPOSES
     loginserver_record = 'wyao332,69592f14f52422ecf713b21f1615da2fec7d67eb7f0a8c4d3a72121d8e49cb66,1559114951.7035556,d0a5992d76f5f5464ddc0a530d8ea5f8a99b0fde4e0a3d4b91d100b7515188929ef22801420f25cc0b0f51095fa8cd9fbe6d3c93e1a93b7b2857cafdd6159a0e'
     groupkey_hash = '69592f14f52422ecf713b21f1615da2fec7d67eb7f0a8c4d3a72121d8e49cb66'
     pubkey = '69592f14f52422ecf713b21f1615da2fec7d67eb7f0a8c4d3a72121d8e49cb66'
