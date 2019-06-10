@@ -18,15 +18,15 @@ h3 {
 }
 
 .onlineUsers {
-    flex: 1;
+    flex: 3;
     float: right;
 }
 
 .broadcasts {
-    flex: 4;
+    flex: 5;
     float: right;
 }
 
 .status {
-    flex: 1;
+    flex: 3;
 }
