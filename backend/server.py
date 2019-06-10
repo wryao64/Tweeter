@@ -14,25 +14,15 @@ startHTML = """<html>
                 <head>
                     <title>Python Project</title>
                     <link rel="stylesheet" href="/static/css/styles.css" />
+                    <meta http-equiv='refresh' content='60'>
                 </head>
 
                 <body>
                     <a href="/">Home</a><br/>
                     <a href="/private_messages">Private Messages</a><br/>
                     <a href="/group_messages">Group Messages</a><br/>
-
-                    <h1>LS endpoints</h1>
-                    <a href="list_users">list online users</a><br/>
-                    <a href="server_pubkey">server pubkey</a><br/>
-                    <a href="add_pubkey">add pubkey</a><br/>
-                    <a href="check_pubkey">check pubkey</a><br/>
-                    <a href="get_loginserver_record">get login server record</a><br/>
-                    <a href="add_privatedata">add private data</a><br/>
-                    <a href="get_privatedata">get private data</a><br/>
-                    <a href="list_apis">list apis</a><br/>
-                    <a href="load_new_apikey">load new apikey</a><br/>
-
                     <br/>
+
 
             """
 
@@ -55,47 +45,75 @@ class MainApp(object):
     # Pages
     @cherrypy.expose
     def index(self):
-        Page = startHTML + 'Welcome! This is the base website!<br/>'
+        username = cherrypy.session.get('username')
+        password = cherrypy.session.get('password')
+
+        Page = startHTML
 
         try:
-            Page += 'Hello ' + cherrypy.session['username'] + '!<br/>'
-            Page += 'You have logged in! <a href="/sign_out">Sign out</a>'
+            Page += """
+            <div class='welcome'>
+            Hello {}!<br>
+            You have logged in! <a href="/sign_out">Sign out</a>
+            </div>
+            
+            <div class='container'>
+
+            """.format(cherrypy.session['username'])
 
             Page += """
-            <h3>Change Status</h3>
-            <form action="/change_status" method="post" enctype="multipart/form-data">
-            <input type="radio" name="status" value="online">Online<br/>
-            <input type="radio" name="status" value="busy">Busy<br/>
-            <input type="radio" name="status" value="away">Away<br/>
-            <input type="radio" name="status" value="offline">Offline<br/>
-            <input type="submit" value="Change"/></form>
-
-            <h3>Broadcast Message</h3>
-            <form action="/broadcast_message" method="post" enctype="multipart/form-data">
-            Message: <input type="message" name="message"/><br/>
-            <input type="submit" value="Send"/></form>
-
-            <h3>Check Messages</h3>
-            <a href="check_messages">Check</a>
-            <h3>Ping Check</h3>
-            <a href="ping_check">Check</a><br/>
-
-            <h3>Broadcasts</h3>
+            <div class='status'>
+                <h3>Change Status</h3>
+                <form action="/report_status" method="post" enctype="multipart/form-data">
+                <input type="radio" name="status" value="online">Online<br/>
+                <input type="radio" name="status" value="busy">Busy<br/>
+                <input type="radio" name="status" value="away">Away<br/>
+                <input type="radio" name="status" value="offline">Offline<br/>
+                <input type="submit" value="Change"/></form>
+            </div>
             """
 
+            data = login_server.list_users(username, password)
+
+            try:
+                users = data['users']
+
+                Page += '<div class="onlineUsers">'
+                for user in users:
+                    Page += '{}: {}<br>'.format(user['username'], user['status'])
+
+                    user_repository.post_user_info(
+                        user['username'], user['incoming_pubkey'])
+                Page += '</div>'
+            except KeyError:
+                Page += data['message']
+
+            Page += """
+            <div class='broadcasts'>
+                <h3>Broadcast Message</h3>
+                
+                <form action="/broadcast_message" method="post" enctype="multipart/form-data">
+                    Message: <input type="message" name="message"/><br/>
+                <input type="submit" value="Send"/></form>
+
+                <h3>Broadcasts</h3>
+            """
             broadcasts = broadcast_repository.get_broadcasts()
 
             if len(broadcasts) == 0:
                 Page += 'There are no broadcasts'
             else:
                 for broadcast in broadcasts:
-                    Page += str(broadcast) + '<br/><br/>'
-
+                    loginserver_record = broadcast[0].split(',')
+                    sender = loginserver_record[0]
+                    message = broadcast[1]
+                    Page += '{}: {}<br/><br/>'.format(sender, message)
+            Page += '</div>'
             
         except KeyError:  # There is no username
-            Page += 'Click here to <a href="login">login</a>.'
+            raise cherrypy.HTTPRedirect('/login')     
+
         return Page
-        # return open('static/frontend/index.html')
 
     @cherrypy.expose
     def login(self, bad_attempt=0):
@@ -114,21 +132,37 @@ class MainApp(object):
     def private_messages(self):
         Page = startHTML
 
-        Page += """
-        <h3>Private Message</h3>
-        <form action="/private_message" method="post" enctype="multipart/form-data">
-            Username: <input type='text' name='target_username'/><br>
-            Message: <input type="message" name="message"/><br>
-        <input type="submit" value="Send"/></form>
-        """
+        try:
+            Page += """
+            <div class='welcome'>
+            Hi {}! These are your private messages!<br>
+            <a href="/sign_out">Sign out</a>
+            </div>
+            
+            <div class='container'>
 
-        private_messages = private_message_repository.get_messages()
+            """.format(cherrypy.session['username'])
 
-        if len(private_messages) == 0:
-            Page += 'There are no messages'
-        else:
-            for message in private_messages:
-                Page += str(message) + '<br/><br/>'
+            Page += """
+            <h3>Private Message</h3>
+            <form action="/private_message" method="post" enctype="multipart/form-data">
+                Username: <input type='text' name='target_username'/><br>
+                Message: <input type="message" name="message"/><br>
+            <input type="submit" value="Send"/></form>
+            """
+
+            private_messages = private_message_repository.get_messages()
+
+            if len(private_messages) == 0:
+                Page += 'There are no messages'
+            else:
+                for message in private_messages:
+                    loginserver_record = message[0].split(',')
+                    sender = loginserver_record[0]
+                    message = message[3]
+                    Page += '{}: {}<br/><br/>'.format(sender, message)
+        except KeyError:
+            raise cherrypy.HTTPRedirect('/login')            
 
         return Page
 
@@ -136,26 +170,42 @@ class MainApp(object):
     def group_messages(self):
         Page = startHTML
 
-        Page += """
-        <h3>Group Message</h3>
-        <form action="/group_message" method="post" enctype="multipart/form-data">
-            Message: <input type="message" name="message"/><br/>
-        <input type="submit" value="Send"/></form>
+        try:
+            Page += """
+            <div class='welcome'>
+            Hi {}! These are your private messages!<br>
+            <a href="/sign_out">Sign out</a>
+            </div>
+            
+            <div class='container'>
 
-        <h3>Group Invite</h3>
-        <form action="/group_invite" method="post" enctype="multipart/form-data">
-            Username: <input type="username" name="username"/><br/>
-        <input type="submit" value="Send"/></form>
-        """
+            """.format(cherrypy.session['username'])
 
-        group_messages = group_message_repository.get_messages()
+            Page += """
+            <h3>Group Message</h3>
+            <form action="/group_message" method="post" enctype="multipart/form-data">
+                Message: <input type="message" name="message"/><br/>
+            <input type="submit" value="Send"/></form>
 
-        Page += '<h3>Group Messages</h3>'
-        if len(group_messages) == 0:
-            Page += 'There are no messages'
-        else:
-            for message in group_messages:
-                Page += str(message) + '<br/><br/>'
+            <h3>Group Invite</h3>
+            <form action="/group_invite" method="post" enctype="multipart/form-data">
+                Username: <input type="username" name="username"/><br/>
+            <input type="submit" value="Send"/></form>
+            """
+
+            group_messages = group_message_repository.get_messages()
+
+            Page += '<h3>Group Messages</h3>'
+            if len(group_messages) == 0:
+                Page += 'There are no messages'
+            else:
+                for message in group_messages:
+                    loginserver_record = message[0].split(',')
+                    sender = loginserver_record[0]
+                    message = message[2]
+                    Page += '{}: {}<br/><br/>'.format(sender, message)
+        except KeyError:
+            raise cherrypy.HTTPRedirect('/login')            
         
         return Page
 
@@ -250,7 +300,8 @@ class MainApp(object):
             user_repository.post_login_time(username, ts)
 
             # check for messages sent while offline
-            raise cherrypy.HTTPRedirect('/check_messages')
+            # raise cherrypy.HTTPRedirect('/check_messages')  # TURNED OFF FOR TESTING
+            raise cherrypy.HTTPRedirect('/')
         else:
             raise cherrypy.HTTPRedirect('/login?bad_attempt=1')
 
@@ -272,7 +323,7 @@ class MainApp(object):
 
     # Unsorted
     @cherrypy.expose
-    def change_status(self, status='online'):
+    def report_status(self, status='online'):
         username = cherrypy.session.get('username')
         password = cherrypy.session.get('password')
 
@@ -282,36 +333,6 @@ class MainApp(object):
             raise cherrypy.HTTPRedirect('/')
         else:
             raise cherrypy.HTTPRedirect('/')
-
-    @cherrypy.expose
-    def list_users(self):
-        username = cherrypy.session.get('username')
-        password = cherrypy.session.get('password')
-
-        Page = startHTML
-
-        data = login_server.list_users(username, password)
-
-        try:
-            users = data['users']
-
-            for user in users:
-                Page += """
-                Incoming pub key: {}<br/>
-                Username: {}<br/>
-                Connection Location: {}<br/>
-                Connection Address: {}<br/>
-                Status: {}<br/>
-                Connection Updated At: {}<br/>
-                <br/>
-                """.format(user['incoming_pubkey'], user['username'], user['connection_location'], user['connection_address'], user['status'], user['connection_updated_at'])
-
-                user_repository.post_user_info(
-                    user['username'], user['incoming_pubkey'])
-        except KeyError:
-            Page += data['message']
-
-        return Page
 
     @cherrypy.expose
     def server_pubkey(self):
