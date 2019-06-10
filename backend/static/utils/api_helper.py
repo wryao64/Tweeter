@@ -35,7 +35,7 @@ def get_data(url, headers=None, data=None):
         else:
             req = urllib.request.Request(url, data=data, headers=headers)
 
-        response = urllib.request.urlopen(req, timeout=2)
+        response = urllib.request.urlopen(req, timeout=3)
         data = response.read()
         encoding = response.info().get_content_charset('utf-8')
         data_object = json.loads(data.decode(encoding))
