@@ -47,6 +47,7 @@ class MainApp(object):
     def index(self):
         username = cherrypy.session.get('username')
         password = cherrypy.session.get('password')
+        client_outgoing_request.ping_check_all(username, password)
 
         Page = startHTML
 
@@ -130,6 +131,10 @@ class MainApp(object):
 
     @cherrypy.expose
     def private_messages(self):
+        username = cherrypy.session.get('username')
+        password = cherrypy.session.get('password')
+        client_outgoing_request.ping_check_all(username, password)
+
         Page = startHTML
 
         try:
@@ -170,6 +175,10 @@ class MainApp(object):
 
     @cherrypy.expose
     def group_messages(self):
+        username = cherrypy.session.get('username')
+        password = cherrypy.session.get('password')
+        client_outgoing_request.ping_check_all(username, password)
+
         Page = startHTML
 
         try:

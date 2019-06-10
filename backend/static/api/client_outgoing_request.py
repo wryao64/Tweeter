@@ -293,6 +293,25 @@ def ping_check(username, password, target_connection_address, my_active_username
     return data_object
 
 
+def ping_check_all(username, password):
+        users = login_server.list_users(username, password)['users']
+
+        for user in users:
+            connection_address = user['connection_address']
+
+            # ping client to check if they are online
+            response = ping_check(username, password, connection_address)
+            try:
+                if response['response'] != 'ok':
+                    cherrypy.log('{}: Ping error: {}'.format(
+                        connection_address, response['message']))
+                    continue
+            except KeyError:
+                continue
+            except TypeError:
+                continue
+
+
 def group_message(username, password, message):
     """
     Transmits a secret group message between users
