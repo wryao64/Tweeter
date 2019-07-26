@@ -1,4 +1,8 @@
-# Python Project
+# Python Project - Tweeter
+
+Created for a university project. It is incomplete.
+
+Tweeter is a web application that uses the Python libraries CherryPy and PyNaCl, as well as a database.
 
 ## How to Run
 * Open folder 2019-Python-wyao332/
